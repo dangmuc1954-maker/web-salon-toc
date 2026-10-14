@@ -7,11 +7,15 @@
     },
     {
       "source": "/admin",
-      "destination": "/admin.html"
+      "destination": "/public/admin.html"
     },
     {
       "source": "/orders",
-      "destination": "/orders.html"
+      "destination": "/public/orders.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
     }
   ]
 }
