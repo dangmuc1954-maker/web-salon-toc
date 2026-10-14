@@ -2,20 +2,18 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/admin",
-      "destination": "/public/admin.html"
-    },
-    {
-      "source": "/orders",
-      "destination": "/public/orders.html"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/public/$1"
+      "destination": {
+        "type": "service",
+        "service": "web-salon-toc"
+      }
     }
-  ]
+  ],
+  "services": {
+    "web-salon-toc": {
+      "root": ".",
+      "entrypoint": "server.js",
+      "buildCommand": "npm install"
+    }
+  }
 }
