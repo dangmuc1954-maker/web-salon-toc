@@ -1,0 +1,17 @@
+{
+  "name": "web-salon-toc",
+  "version": "1.0.0",
+  "description": "Website Salon Tóc - Xem mẫu tóc, Bảng giá dịch vụ, Bảng màu sắc, Order nhân viên tư vấn & Đặt lịch theo đúng Stylist",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

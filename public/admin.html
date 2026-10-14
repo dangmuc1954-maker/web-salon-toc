@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bàn Quản Trị Salon - Tự Sửa Thông Tin, Giá, Nhân Viên & Đổi Hình Web</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 75px);
+    }
+    .admin-sidebar {
+      background: #14110f;
+      border-right: 1px solid var(--border-subtle);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .admin-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .admin-nav-btn:hover {
+      background: rgba(212, 175, 55, 0.08);
+      color: var(--text-main);
+    }
+    .admin-nav-btn.active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.22), rgba(212, 175, 55, 0.08));
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+    }
+    .admin-content {
+      padding: 28px;
+      max-width: 1200px;
+    }
+    .admin-panel {
+      display: none;
+    }
+    .admin-panel.active {
+      display: block;
+    }
+    .admin-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .admin-item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    .admin-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .admin-card-img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .admin-card-body {
+      padding: 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .admin-card-actions {
+      margin-top: auto;
+      padding-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .upload-box {
+      border: 1px dashed var(--gold-primary);
+      background: rgba(212, 175, 55, 0.06);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .upload-preview {
+      width: 78px;
+      height: 78px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--gold-primary);
+      background: #0f0d0c;
+      flex-shrink: 0;
+    }
+    .toast-banner {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, #22c55e, #15803d);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      z-index: 999;
+      display: none;
+    }
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 9, 8, 0.96);
+      z-index: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+    }
+    @media (max-width: 900px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+      .admin-sidebar {
+        flex-direction: row;
+        overflow-x: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .admin-nav-btn {
+        white-space: nowrap;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MÀN HÌNH ĐĂNG NHẬP BÀN QUẢN TRỊ -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="brand-icon" style="margin: 0 auto 14px; width:56px; height:56px; font-size:26px;">🛠️</div>
+      <h2 style="font-size:22px; margin-bottom:6px;">Bàn Quản Trị Salon Tóc</h2>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
+        Nhập mật khẩu quản lý để tự thêm/sửa Mẫu tóc, Dịch vụ, Bảng giá, Bảng màu, Nhân viên và tải ảnh lên web.
+      </p>
+      <form id="adminLoginForm">
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label">Mật khẩu Quản trị (Mặc định: 123456)</label>
+          <input type="password" id="adminPassInput" class="form-control" value="123456" placeholder="Nhập mật khẩu..." required />
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;">🔓 Mở Bàn Quản Trị</button>
+      </form>
+      <div style="margin-top:14px;">
+        <a href="/" style="font-size:13px; color:var(--gold-light);">⬅ Quay lại trang khách hàng</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER BÀN QUẢN TRỊ -->
+  <header class="navbar">
+    <div class="container navbar-inner" style="max-width:100%; padding:0 24px;">
+      <div class="brand">
+        <div class="brand-icon">🛠️</div>
+        <div>
+          <div class="brand-title">BÀN QUẢN TRỊ SALON (ADMIN CMS)</div>
+          <div class="brand-sub">Sửa thông tin & Đổi hình trực tiếp — Cập nhật tức thì lên Web</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="exportBackupJson()">⬇️ Tải File Sao Lưu</button>
+        <a href="/" target="_blank" class="btn btn-gold btn-sm">🌐 Xem Trang Web Khách Hàng ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- BỐ CỤC CHÍNH -->
+  <div class="admin-layout">
+    <!-- THANH MENU BÊN TRÁI -->
+    <aside class="admin-sidebar">
+      <button type="button" class="admin-nav-btn active" data-tab="tab-hairstyles">
+        💇‍♀️ 1. Mẫu Tóc & Ảnh Mẫu (<span id="countHairstyles">0</span>)
+      </button>
+      <button type="button" class="admin-nav-btn" data-tab="tab-services">
+        💎 2. Dịch Vụ & Bảng Giá (<span id="countServices">0</span>)
+      </button>
+      <button type="button" class="admin-nav-btn" data-tab="tab-staff">
+        👨‍🎨 3. Nhân Viên & SĐT (<span id="countStaff">0</span>)
+      </button>
+      <button type="button" class="admin-nav-btn" data-tab="tab-colors">
+        🎨 4. Bảng Màu Sắc (<span id="countColors">0</span>)
+      </button>
+      <button type="button" class="admin-nav-btn" data-tab="tab-orders">
+        📋 5. Đơn Khách Đặt Lịch (<span id="countOrders">0</span>)
+      </button>
+      <button type="button" class="admin-nav-btn" data-tab="tab-settings">
+        ⚙️ 6. Thông Tin Quán & Telegram
+      </button>
+    </aside>
+
+    <!-- NỘI DUNG TỪNG MỤC -->
+    <main class="admin-content">
+
+      <!-- TAB 1: QUẢN LÝ MẪU TÓC -->
+      <section class="admin-panel active" id="tab-hairstyles">
+        <div class="admin-top-bar">
+          <div>
+            <h2 class="section-title">💇‍♀️ Quản Lý Tất Cả Mẫu Tóc & Ảnh</h2>
+            <p class="section-sub">Anh bấm "Thêm Mẫu Tóc Mới" hoặc bấm "Sửa / Đổi Hình" trên từng mẫu để tải hình từ điện thoại/máy tính và sửa mô tả chi tiết.</p>
+          </div>
+          <button type="button" class="btn btn-gold" onclick="openHairstyleEditor()">
+            ➕ Thêm Mẫu Tóc Mới
+          </button>
+        </div>
+        <div class="admin-item-grid" id="adminHairstylesList"></div>
+      </section>
+
+      <!-- TAB 2: QUẢN LÝ DỊCH VỤ & BẢNG GIÁ -->
+      <section class="admin-panel" id="tab-services">
+        <div class="admin-top-bar">
+          <div>
+            <h2 class="section-title">💎 Quản Lý Dịch Vụ Làm Tóc & Giá Tiền</h2>
+            <p class="section-sub">Tự do thêm dịch vụ mới, đổi hình dịch vụ, chỉnh sửa giá tiền và các gói nhỏ trong từng dịch vụ.</p>
+          </div>
+          <button type="button" class="btn btn-gold" onclick="openServiceEditor()">
+            ➕ Thêm Dịch Vụ Mới
+          </button>
+        </div>
+        <div class="admin-item-grid" id="adminServicesList"></div>
+      </section>
+
+      <!-- TAB 3: QUẢN LÝ NHÂN VIÊN & SĐT LIÊN LẠC -->
+      <section class="admin-panel" id="tab-staff">
+        <div class="admin-top-bar">
+          <div>
+            <h2 class="section-title">👨‍🎨 Quản Lý Nhân Viên / Stylist & SĐT Liên Lạc</h2>
+            <p class="section-sub">Thêm nhân viên mới, đổi ảnh chân dung, cập nhật Số điện thoại & Zalo của từng nhân viên để khách liên hệ khi đặt lịch.</p>
+          </div>
+          <button type="button" class="btn btn-gold" onclick="openStaffEditor()">
+            ➕ Thêm Nhân Viên Mới
+          </button>
+        </div>
+        <div class="admin-item-grid" id="adminStaffList"></div>
+      </section>
+
+      <!-- TAB 4: QUẢN LÝ BẢNG MÀU SẮC -->
+      <section class="admin-panel" id="tab-colors">
+        <div class="admin-top-bar">
+          <div>
+            <h2 class="section-title">🎨 Quản Lý Bảng Màu Sắc Tóc</h2>
+            <p class="section-sub">Thêm mã màu mới, chọn màu trực quan, ghi rõ cần tẩy hay không và mức giá nhuộm tham khảo.</p>
+          </div>
+          <button type="button" class="btn btn-gold" onclick="openColorEditor()">
+            ➕ Thêm Màu Tóc Mới
+          </button>
+        </div>
+        <div class="admin-item-grid" id="adminColorsList"></div>
+      </section>
+
+      <!-- TAB 5: QUẢN LÝ ĐƠN KHÁCH ĐẶT LỊCH -->
+      <section class="admin-panel" id="tab-orders">
+        <div class="admin-top-bar">
+          <div>
+            <h2 class="section-title">📋 Danh Sách Đơn Khách Đặt Lịch & Order Tư Vấn</h2>
+            <p class="section-sub">Toàn bộ đơn khách gửi về máy chủ và nhân viên khách đã chọn.</p>
+          </div>
+          <button type="button" class="btn btn-outline" onclick="loadAdminOrders()">
+            🔄 Làm Mới Danh Sách Đơn
+          </button>
+        </div>
+        <div id="adminOrdersContainer" style="display:grid; gap:14px;"></div>
+      </section>
+
+      <!-- TAB 6: CÀI ĐẶT THÔNG TIN SALON & TELEGRAM -->
+      <section class="admin-panel" id="tab-settings">
+        <div class="admin-top-bar">
+          <div>
+            <h2 class="section-title">⚙️ Thông Tin Chung Salon & Thông Báo Telegram / Zalo</h2>
+            <p class="section-sub">Chỉnh sửa tên tiệm, địa chỉ, hotline, giờ mở cửa và mã nhận thông báo tự động khi có khách đặt lịch.</p>
+          </div>
+        </div>
+
+        <form id="salonSettingsForm" style="background:var(--bg-card); padding:24px; border-radius:16px; border:1px solid var(--border-subtle);">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Tên Đầy Đủ Của Salon</label>
+              <input type="text" id="setSalonName" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tên Ngắn Gọn (Hiện Trên Logo)</label>
+              <input type="text" id="setShortName" class="form-control" required />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Số Điện Thoại Hotline Chính</label>
+              <input type="text" id="setHotline" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Giờ Mở Cửa</label>
+              <input type="text" id="setOpenHours" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Địa Chỉ Salon</label>
+            <input type="text" id="setAddress" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mô Tả Giới Thiệu Đầu Trang</label>
+            <textarea id="setDescription" rows="2" class="form-control"></textarea>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--border-subtle); margin:20px 0;" />
+          <h3 style="margin-bottom:14px; color:var(--gold-light);">🔔 Cài Đặt Nhận Thông Báo Đơn Hàng & Mật Khẩu Quản Trị</h3>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Telegram Bot Token (Từ @BotFather)</label>
+              <input type="text" id="setTgToken" class="form-control" placeholder="VD: 712345678:AAH..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Telegram Chat ID (ID cá nhân hoặc Nhóm Salon)</label>
+              <input type="text" id="setTgChatId" class="form-control" placeholder="VD: -100123456789" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Zalo Webhook URL (Nếu dùng Make / n8n / Zalo OA)</label>
+              <input type="text" id="setZaloWebhook" class="form-control" placeholder="https://..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mật Khẩu Đăng Nhập Bàn Quản Trị Này</label>
+              <input type="text" id="setAdminPasscode" class="form-control" placeholder="Mặc định: 123456" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-gold" style="padding:14px 28px; font-size:15px;">
+            💾 Lưu Cài Đặt Salon Lên Web
+          </button>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL THÊM / SỬA DỮ LIỆU & UPLOAD HÌNH -->
+  <div class="modal-backdrop" id="editorModal">
+    <div class="modal-box" style="max-width:740px;">
+      <button type="button" class="modal-close" onclick="closeEditorModal()">✕</button>
+      <div id="editorModalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-banner" id="toastBanner">✅ Đã lưu thay đổi lên Website!</div>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

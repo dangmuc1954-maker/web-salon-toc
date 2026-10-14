@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LUXE HAIR STUDIO - Xem Mẫu Tóc, Bảng Giá, Bảng Màu & Đặt Lịch Stylist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-bar-item">
+        <span>📍 <span id="topAddress">128 Nguyễn Trãi, Quận 1, TP.HCM</span></span>
+        <span style="margin: 0 8px;">|</span>
+        <span>🕒 <span id="topHours">08:30 - 21:00 (Thứ 2 - CN)</span></span>
+      </div>
+      <div class="top-bar-item">
+        <span>📞 Hotline Salon: <a id="topHotline" href="tel:0909888999" class="top-bar-highlight">0909888999</a></span>
+        <span style="margin: 0 8px;">|</span>
+        <a href="/admin" class="top-bar-highlight">🛠️ Bàn Quản Trị (Tự Sửa Web & Đổi Hình)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVBAR + THANH TÌM KIẾM THEO TÊN -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="#" class="brand">
+        <div class="brand-icon">✂</div>
+        <div>
+          <div class="brand-title" id="brandName">LUXE HAIR STUDIO</div>
+          <div class="brand-sub">Hair Salon & Color Lab</div>
+        </div>
+      </a>
+
+      <!-- THANH TÌM KIẾM TOÀN CỤC THEO TÊN -->
+      <div class="global-search-wrap" id="globalSearchWrap">
+        <div class="global-search-box">
+          <span>🔍</span>
+          <input
+            type="text"
+            id="globalSearchInput"
+            class="global-search-input"
+            placeholder="Tìm theo tên kiểu tóc, dịch vụ, màu sắc, tên nhân viên..."
+            autocomplete="off"
+          />
+          <button type="button" id="globalSearchClear" class="search-clear-btn" title="Xóa">✕</button>
+        </div>
+        <div id="globalSearchDropdown" class="search-dropdown"></div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#kieu-toc" class="nav-link">Mẫu Tóc</a>
+        <a href="#dich-vu" class="nav-link">Dịch Vụ & Giá</a>
+        <a href="#bang-mau" class="nav-link">Bảng Màu</a>
+        <a href="#nhan-vien" class="nav-link">Stylist & Tư Vấn</a>
+        <a href="#dat-lich" class="btn btn-gold btn-sm">📅 Đặt Lịch Ngay</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO BANNER -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="hero-tag">✨ HỆ THỐNG ĐẶT LỊCH & CHỌN ĐÚNG STYLIST YÊU THÍCH</div>
+        <h1 class="hero-title">
+          Khám Phá <span id="heroSalonName">Tất Cả Kiểu Tóc</span>, Bảng Màu & Đặt Lịch Đúng Stylist
+        </h1>
+        <p class="hero-desc" id="heroSalonDesc">
+          Xem trọn bộ mẫu tóc nam nữ mới nhất kèm mô tả chi tiết, bảng giá dịch vụ minh bạch, bảng màu nhuộm trực quan và đặt lịch hoặc order đúng nhân viên tư vấn chỉ trong 30 giây.
+        </p>
+        <div class="hero-actions">
+          <a href="#kieu-toc" class="btn btn-gold">💇‍♀️ Xem Tất Cả Kiểu Tóc</a>
+          <a href="#dich-vu" class="btn btn-outline">💎 Bảng Giá Dịch Vụ</a>
+          <a href="#nhan-vien" class="btn btn-outline">👨‍🎨 Chọn Nhân Viên Tư Vấn</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-box">
+            <strong id="statHairstyles">8+</strong>
+            <span>Mẫu Tóc Thịnh Hành</span>
+          </div>
+          <div class="stat-box">
+            <strong id="statServices">8+</strong>
+            <span>Gói Dịch Vụ Minh Bạch</span>
+          </div>
+          <div class="stat-box">
+            <strong id="statColors">10+</strong>
+            <span>Mã Màu Nhuộm Chuẩn</span>
+          </div>
+          <div class="stat-box">
+            <strong id="statStaff">6+</strong>
+            <span>Master & Senior Stylist</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-collage">
+          <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80" alt="Mẫu tóc Layer Sóng Lơi" />
+          <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80" alt="Nhuộm Balayage" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. TẤT CẢ KIỂU TÓC (BỘ SƯU TẬP MẪU TÓC + MÔ TẢ CHI TIẾT) -->
+  <section id="kieu-toc" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label">BỘ SƯU TẬP MẪU TÓC</div>
+          <h2 class="section-title">Xem Tất Cả Kiểu Tóc & Mô Tả Chi Tiết</h2>
+          <p class="section-sub">Bấm vào từng ảnh mẫu tóc để xem chi tiết kỹ thuật cắt/uốn/nhuộm, khuôn mặt phù hợp, thời gian làm và chọn nhân viên thực hiện.</p>
+        </div>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="filter-tabs" id="hairstyleCategoryTabs"></div>
+        <input
+          type="text"
+          id="hairstyleSearchInput"
+          class="inline-search"
+          placeholder="🔎 Tìm tên kiểu tóc (VD: Layer, Bob, Nam...)"
+        />
+      </div>
+
+      <div class="hairstyles-grid" id="hairstylesGrid"></div>
+    </div>
+  </section>
+
+  <!-- 2. TẤT CẢ DỊCH VỤ & BẢNG GIÁ CHI TIẾT -->
+  <section id="dich-vu" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label">BẢNG GIÁ MINH BẠCH</div>
+          <h2 class="section-title">Tất Cả Dịch Vụ Làm Tóc & Chi Tiết Giá</h2>
+          <p class="section-sub">Cam kết báo đúng giá theo gói dịch vụ, sử dụng thuốc chính hãng và bảo hành miễn phí rõ ràng cho từng dịch vụ.</p>
+        </div>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="filter-tabs" id="serviceCategoryTabs"></div>
+        <input
+          type="text"
+          id="serviceSearchInput"
+          class="inline-search"
+          placeholder="🔎 Tìm tên dịch vụ (VD: Uốn, Balayage, Phục hồi...)"
+        />
+      </div>
+
+      <div class="services-grid" id="servicesGrid"></div>
+    </div>
+  </section>
+
+  <!-- 3. BẢNG MÀU SẮC TÓC TRỰC QUAN -->
+  <section id="bang-mau" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label">HAIR COLOR CHART</div>
+          <h2 class="section-title">Bảng Màu Sắc Tóc & Tư Vấn Tông Da</h2>
+          <p class="section-sub">Khám phá các mã màu nhuộm từ Nâu Công Sở không cần tẩy đến Balayage / Khói thời thượng. Bấm vào màu bất kỳ để xem chi tiết & chọn nhuộm.</p>
+        </div>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="filter-tabs" id="colorGroupTabs"></div>
+        <input
+          type="text"
+          id="colorSearchInput"
+          class="inline-search"
+          placeholder="🔎 Tìm tên màu hoặc mã màu (VD: Trà sữa, Khói, NT-6.1...)"
+        />
+      </div>
+
+      <div class="color-palette-grid" id="colorPaletteGrid"></div>
+    </div>
+  </section>
+
+  <!-- 4. ĐỘI NGŨ NHÂN VIÊN / STYLIST (ORDER TƯ VẤN & ĐẶT ĐÚNG NHÂN VIÊN) -->
+  <section id="nhan-vien" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <div class="section-label">ĐỘI NGŨ CHUYÊN GIA</div>
+          <h2 class="section-title">Chọn Nhân Viên Tư Vấn & Đặt Lịch Đúng Stylist</h2>
+          <p class="section-sub">Mỗi Stylist có thế mạnh riêng và thông tin số điện thoại / Zalo trực tiếp. Quý khách có thể Order nhân viên tư vấn hoặc Đặt lịch đích danh nhân viên mình yêu thích.</p>
+        </div>
+        <input
+          type="text"
+          id="staffSearchInput"
+          class="inline-search"
+          placeholder="🔎 Tìm theo tên nhân viên hoặc SĐT..."
+        />
+      </div>
+
+      <div class="staff-grid" id="staffGrid"></div>
+    </div>
+  </section>
+
+  <!-- 5. FORM ĐẶT LỊCH & ORDER NHÂN VIÊN TƯ VẤN -->
+  <section id="dat-lich" class="section">
+    <div class="container">
+      <div class="booking-wrapper">
+        <div class="section-header" style="margin-bottom: 20px;">
+          <div>
+            <div class="section-label">ĐẶT LỊCH & ORDER TƯ VẤN TRỰC TUYẾN</div>
+            <h2 class="section-title">Gửi Yêu Cầu Về Salon & Nhận SĐT Nhân Viên Ngay</h2>
+            <p class="section-sub">Sau khi bấm gửi, đơn của quý khách sẽ được chuyển ngay về máy chủ Salon & thông báo cho đúng nhân viên phụ trách, đồng thời hiển thị SĐT/Zalo của nhân viên đó để quý khách liên lạc trực tiếp.</p>
+          </div>
+        </div>
+
+        <div class="booking-grid">
+          <form id="bookingForm">
+            <!-- Chọn loại yêu cầu -->
+            <div class="order-type-switch">
+              <div class="order-type-btn active" data-type="booking" id="btnTypeBooking">
+                📅 Đặt Lịch Làm Tóc Đúng Nhân Viên
+              </div>
+              <div class="order-type-btn" data-type="consult" id="btnTypeConsult">
+                💬 Order Nhân Viên Tư Vấn Trước
+              </div>
+            </div>
+            <input type="hidden" id="orderTypeInput" value="booking" />
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Họ và Tên Quý Khách *</label>
+                <input type="text" id="customerName" class="form-control" placeholder="Nhập họ tên của bạn..." required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số Điện Thoại (Zalo) *</label>
+                <input type="tel" id="customerPhone" class="form-control" placeholder="Nhập số điện thoại liên hệ..." required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Chọn Đúng Nhân Viên / Stylist Phụ Trách *</label>
+              <select id="staffSelect" class="form-control"></select>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Chọn Kiểu Tóc Mẫu Quan Tâm (Tùy chọn)</label>
+                <select id="hairstyleSelect" class="form-control">
+                  <option value="">-- Nhờ nhân viên tư vấn kiểu hợp khuôn mặt --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Chọn Màu Nhuộm Từ Bảng Màu (Tùy chọn)</label>
+                <select id="colorSelect" class="form-control">
+                  <option value="">-- Chưa chọn màu / Tư vấn tại Salon --</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Chọn Dịch Vụ Muốn Thực Hiện (Có thể chọn nhiều dịch vụ)</label>
+              <div class="service-checkbox-list" id="serviceCheckboxList"></div>
+            </div>
+
+            <div class="form-row-2" id="dateTimeRow">
+              <div class="form-group">
+                <label class="form-label">Ngày Hẹn Đến Salon</label>
+                <input type="date" id="appointmentDate" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Khung Giờ Hẹn</label>
+                <select id="appointmentTime" class="form-control"></select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Ghi Chú Tình Trạng Tóc Hiện Tại / Yêu Cầu Thêm</label>
+              <textarea
+                id="bookingNote"
+                rows="3"
+                class="form-control"
+                placeholder="VD: Tóc mình từng uốn cách đây 6 tháng, muốn tư vấn uốn sóng lơi và nhuộm nâu trà sữa..."
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-gold" style="width: 100%; padding: 15px; font-size: 16px;" id="submitBookingBtn">
+              ✨ XÁC NHẬN GỬI ĐƠN & LẤY THÔNG TIN LIÊN LẠC NHÂN VIÊN
+            </button>
+          </form>
+
+          <!-- BÊN PHẢI: THÔNG TIN NHÂN VIÊN ĐANG ĐƯỢC CHỌN -->
+          <div class="selected-staff-preview" id="selectedStaffPreview"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p style="color: var(--gold-light); font-weight: 700; font-size: 15px; margin-bottom: 6px;" id="footerSalonName">LUXE HAIR STUDIO & ACADEMY</p>
+      <p id="footerSalonContact">Địa chỉ: 128 Nguyễn Trãi, Quận 1, TP.HCM | Hotline: 0909888999</p>
+      <p style="margin-top: 10px;">
+        Dữ liệu mẫu tóc, bảng giá, bảng màu và nhân viên được cấu hình trực tiếp tại file <code>data/salon-config.js</code>
+      </p>
+    </div>
+  </footer>
+
+  <!-- MODAL XEM CHI TIẾT MẪU TÓC / DỊCH VỤ / BẢNG MÀU / KẾT QUẢ ĐẶT LỊCH -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal-box">
+      <button type="button" class="modal-close" id="detailModalClose">✕</button>
+      <div id="detailModalContent"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
