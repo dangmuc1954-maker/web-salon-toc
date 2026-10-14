@@ -2,33 +2,47 @@
  * ============================================================================
  * FILE CẤU HÌNH DỮ LIỆU TRUNG TÂM - WEBSITE SALON TÓC
  * ============================================================================
- * Anh chỉ cần sửa trực tiếp nội dung trong file này:
- * 1. Thêm / sửa Nhân viên & Số điện thoại liên hệ tại mục `staff`
- * 2. Thêm / sửa Mẫu tóc & Mô tả chi tiết tại mục `hairstyles`
- * 3. Thêm / sửa Dịch vụ & Giá tiền tại mục `services`
- * 4. Thêm / sửa Bảng màu tóc tại mục `colors`
- * 5. Cài đặt Telegram / Zalo nhận thông báo đơn đặt lịch tại mục `notifications`
- *
- * Mẹo thêm ảnh:
- * - Cách 1: Copy file ảnh vào thư mục `public/images/` rồi ghi đường dẫn: "/images/ten-anh.jpg"
- * - Cách 2: Dán trực tiếp đường link ảnh trên mạng (Facebook, Imgur, Google, Unsplash...)
- * ============================================================================
  */
 
 module.exports = {
   // ==========================================================================
-  // 1. THÔNG TIN CHUNG CỦA SALON
+  // 1. THÔNG TIN GIAO DIỆN, LOGO, GIỚI THIỆU, ĐỊA CHỈ & HOTLINE CỦA SALON
   // ==========================================================================
   salonInfo: {
+    pageTitle: "LUXE HAIR STUDIO - Xem Mẫu Tóc, Bảng Giá, Bảng Màu & Đặt Lịch Stylist",
     name: "LUXE HAIR STUDIO & ACADEMY",
-    shortName: "LUXE SALON",
+    shortName: "LUXE HAIR STUDIO",
+    brandSubtitle: "Hair Salon & Color Lab",
+    logoIconText: "✂",
+    logoImageUrl: "", // Nếu tải ảnh Logo lên, web sẽ hiện ảnh Logo này thay cho ký hiệu kéo ✂ và làm icon tab web (Favicon)
     slogan: "Định Hình Phong Cách - Nâng Tầm Vẻ Đẹp Tóc Việt",
+    heroTag: "✨ HỆ THỐNG ĐẶT LỊCH & CHỌN ĐÚNG STYLIST YÊU THÍCH",
+    heroTitlePrefix: "Khám Phá",
+    heroTitleHighlight: "Tất Cả Kiểu Tóc",
+    heroTitleSuffix: ", Bảng Màu & Đặt Lịch Đúng Stylist",
     description:
-      "Hệ thống Salon tóc chuyên nghiệp hàng đầu về tạo mẫu tóc Layer, Uốn Sóng Lơi Hàn Quốc, Nhuộm Balayage & Phục hồi Keratin chuyên sâu với đội ngũ Master Stylist giàu kinh nghiệm.",
+      "Xem trọn bộ mẫu tóc nam nữ mới nhất kèm mô tả chi tiết, bảng giá dịch vụ minh bạch, bảng màu nhuộm trực quan và đặt lịch hoặc order đúng nhân viên tư vấn chỉ trong 30 giây.",
+    heroImage1: "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80",
+    heroImage2: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80",
+    stat1Label: "Mẫu Tóc Thịnh Hành",
+    stat2Label: "Gói Dịch Vụ Minh Bạch",
+    stat3Label: "Mã Màu Nhuộm Chuẩn",
+    stat4Label: "Master & Senior Stylist",
     address: "128 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh",
     hotline: "0909888999",
     zaloMain: "0909888999",
     openHours: "08:30 - 21:00 (Thứ 2 - Chủ Nhật)",
+    footerNote: "Hệ thống Đặt lịch làm tóc & Tư vấn Stylist trực tuyến 24/7.",
+    sectionHairTitle: "Xem Tất Cả Kiểu Tóc & Mô Tả Chi Tiết",
+    sectionHairSub: "Bấm vào từng ảnh mẫu tóc để xem chi tiết kỹ thuật cắt/uốn/nhuộm, khuôn mặt phù hợp, thời gian làm và chọn nhân viên thực hiện.",
+    sectionServiceTitle: "Tất Cả Dịch Vụ Làm Tóc & Chi Tiết Giá",
+    sectionServiceSub: "Cam kết báo đúng giá theo gói dịch vụ, sử dụng thuốc chính hãng và bảo hành miễn phí rõ ràng cho từng dịch vụ.",
+    sectionColorTitle: "Bảng Màu Sắc Tóc & Tư Vấn Tông Da",
+    sectionColorSub: "Khám phá các mã màu nhuộm từ Nâu Công Sở không cần tẩy đến Balayage / Khói thời thượng. Bấm vào màu bất kỳ để xem chi tiết & chọn nhuộm.",
+    sectionStaffTitle: "Chọn Nhân Viên Tư Vấn & Đặt Lịch Đúng Stylist",
+    sectionStaffSub: "Mỗi Stylist có thế mạnh riêng và thông tin số điện thoại / Zalo trực tiếp. Quý khách có thể Order nhân viên tư vấn hoặc Đặt lịch đích danh nhân viên mình yêu thích.",
+    sectionBookingTitle: "Gửi Yêu Cầu Về Salon & Nhận SĐT Nhân Viên Ngay",
+    sectionBookingSub: "Sau khi bấm gửi, đơn của quý khách sẽ được chuyển ngay về máy chủ Salon & thông báo cho đúng nhân viên phụ trách, đồng thời hiển thị SĐT/Zalo của nhân viên đó để quý khách liên lạc trực tiếp.",
     timeSlots: [
       "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
       "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00",
@@ -40,13 +54,9 @@ module.exports = {
   // 2. CẤU HÌNH NHẬN THÔNG BÁO ĐƠN ĐẶT LỊCH / ORDER TƯ VẤN (TELEGRAM & ZALO)
   // ==========================================================================
   notifications: {
-    // Điền Bot Token lấy từ @BotFather trên Telegram (hoặc cài qua biến môi trường TELEGRAM_BOT_TOKEN trên Render)
     telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || "",
-    // Điền Chat ID của chủ Salon hoặc Group Telegram của Salon (hoặc biến môi trường TELEGRAM_CHAT_ID)
     telegramChatId: process.env.TELEGRAM_CHAT_ID || "",
-    // Webhook Zalo / Make.com / n8n / Zapier nếu muốn bắn tự động sang Zalo OA hoặc nhóm Zalo
     zaloWebhookUrl: process.env.ZALO_WEBHOOK_URL || "",
-    // Mật khẩu xem trang danh sách đơn hàng trên web (/orders)
     adminPasscode: process.env.ADMIN_PASSCODE || "123456"
   },
 
@@ -357,6 +367,11 @@ module.exports = {
       warranty: "Bảo hành chỉnh form miễn phí 7 ngày",
       popular: true,
       image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=800&q=80"
+      ],
       shortDesc: "Trọn gói Gội đầu massage thư giãn + Tư vấn dáng mặt + Cắt thiết kế + Sấy tạo kiểu hoàn thiện.",
       detailDesc:
         "Quy trình 5 bước tiêu chuẩn: (1) Stylist kiểm tra chất tóc và cấu trúc xương hàm/trán, (2) Gội đầu sạch sâu kết hợp massage cổ vai gáy 15 phút, (3) Cắt thiết kế tạo phồng và tỉa Layer/Bob/Undercut chuẩn xác, (4) Xả dưỡng mềm mượt, (5) Sấy tạo kiểu và hướng dẫn khách cách tự sấy giữ form tại nhà.",
@@ -377,6 +392,11 @@ module.exports = {
       warranty: "Bảo hành sóng tóc 30 ngày",
       popular: true,
       image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"
+      ],
       shortDesc: "Uốn sóng lơi, sóng nước, uốn cúp tầng Layer bằng thuốc chính hãng Hàn/Nhật/Ý kèm bọc Keratin chống khô xơ.",
       detailDesc:
         "Sử dụng máy uốn kỹ thuật số kiểm soát nhiệt độ thông minh giúp lọn tóc căng bóng, đàn hồi tự nhiên mà không bị cháy hay khô ngọn. Đã bao gồm miễn phí cắt tạo form Layer trước khi uốn và hấp dưỡng khóa biểu bì sau khi hoàn tất.",

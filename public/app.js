@@ -68,6 +68,40 @@ async function fetchSalonData() {
 
 function renderSalonBranding() {
   const info = SALON_DATA.salonInfo || {};
+
+  // 1. Tiêu đề tab trình duyệt & Favicon / Icon Web
+  if (info.pageTitle || info.name) {
+    document.title = info.pageTitle || info.name;
+  }
+  const faviconEl = document.getElementById("faviconEl");
+  const brandIconBox = document.getElementById("brandIconBox");
+
+  if (info.logoImageUrl && info.logoImageUrl.trim()) {
+    if (faviconEl) faviconEl.href = info.logoImageUrl.trim();
+    if (brandIconBox) {
+      brandIconBox.innerHTML = `<img src="${escapeHtml(info.logoImageUrl.trim())}" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:10px;" />`;
+      brandIconBox.style.padding = "0";
+      brandIconBox.style.overflow = "hidden";
+    }
+  } else {
+    const iconChar = (info.logoIconText || "✂").trim();
+    if (brandIconBox) {
+      brandIconBox.textContent = iconChar;
+    }
+    if (faviconEl) {
+      faviconEl.href = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${encodeURIComponent(
+        iconChar
+      )}</text></svg>`;
+    }
+  }
+
+  // 2. Tên thương hiệu & dòng chữ phụ chỗ "LUXE SALON - Hair Salon & Color Lab"
+  if (info.shortName) document.getElementById("brandName").textContent = info.shortName;
+  if (info.brandSubtitle !== undefined) {
+    document.getElementById("brandSubtitle").textContent = info.brandSubtitle;
+  }
+
+  // 3. Thanh thông tin trên cùng (Địa chỉ, Giờ mở cửa, Hotline)
   if (info.address) document.getElementById("topAddress").textContent = info.address;
   if (info.openHours) document.getElementById("topHours").textContent = info.openHours;
   if (info.hotline) {
@@ -75,20 +109,184 @@ function renderSalonBranding() {
     hotlineEl.textContent = info.hotline;
     hotlineEl.href = `tel:${info.hotline}`;
   }
-  if (info.shortName) document.getElementById("brandName").textContent = info.shortName;
-  if (info.name) {
-    document.getElementById("footerSalonName").textContent = info.name;
+
+  // 4. Phần giới thiệu đầu trang (Hero Banner, Tiêu đề lớn, Mô tả giới thiệu, 2 Ảnh lớn)
+  if (info.heroTag !== undefined) {
+    document.getElementById("heroTagText").textContent = info.heroTag;
   }
-  if (info.address && info.hotline) {
-    document.getElementById("footerSalonContact").textContent =
-      `Địa chỉ: ${info.address} | Hotline: ${info.hotline} | Giờ mở cửa: ${info.openHours || ""}`;
+  if (info.heroTitlePrefix !== undefined) {
+    document.getElementById("heroTitlePrefix").textContent = info.heroTitlePrefix + " ";
   }
+  if (info.heroTitleHighlight !== undefined) {
+    document.getElementById("heroSalonName").textContent = info.heroTitleHighlight;
+  }
+  if (info.heroTitleSuffix !== undefined) {
+    document.getElementById("heroTitleSuffix").textContent = info.heroTitleSuffix;
+  }
+  if (info.description !== undefined) {
+    document.getElementById("heroSalonDesc").textContent = info.description;
+  }
+  if (info.heroImage1) {
+    document.getElementById("heroImg1").src = info.heroImage1;
+  }
+  if (info.heroImage2) {
+    document.getElementById("heroImg2").src = info.heroImage2;
+  }
+
+  // 5. Nhãn 4 ô thống kê
+  if (info.stat1Label) document.getElementById("stat1Label").textContent = info.stat1Label;
+  if (info.stat2Label) document.getElementById("stat2Label").textContent = info.stat2Label;
+  if (info.stat3Label) document.getElementById("stat3Label").textContent = info.stat3Label;
+  if (info.stat4Label) document.getElementById("stat4Label").textContent = info.stat4Label;
 
   document.getElementById("statHairstyles").textContent = `${SALON_DATA.hairstyles.length}+`;
   document.getElementById("statServices").textContent = `${SALON_DATA.services.length}+`;
   document.getElementById("statColors").textContent = `${SALON_DATA.colors.length}+`;
   document.getElementById("statStaff").textContent = `${SALON_DATA.staff.length}+`;
+
+  // 6. Tiêu đề & Mô tả từng mục trên web
+  if (info.sectionHairTitle) document.getElementById("secHairTitle").textContent = info.sectionHairTitle;
+  if (info.sectionHairSub) document.getElementById("secHairSub").textContent = info.sectionHairSub;
+  if (info.sectionServiceTitle) document.getElementById("secServiceTitle").textContent = info.sectionServiceTitle;
+  if (info.sectionServiceSub) document.getElementById("secServiceSub").textContent = info.sectionServiceSub;
+  if (info.sectionColorTitle) document.getElementById("secColorTitle").textContent = info.sectionColorTitle;
+  if (info.sectionColorSub) document.getElementById("secColorSub").textContent = info.sectionColorSub;
+  if (info.sectionStaffTitle) document.getElementById("secStaffTitle").textContent = info.sectionStaffTitle;
+  if (info.sectionStaffSub) document.getElementById("secStaffSub").textContent = info.sectionStaffSub;
+  if (info.sectionBookingTitle) document.getElementById("secBookingTitle").textContent = info.sectionBookingTitle;
+  if (info.sectionBookingSub) document.getElementById("secBookingSub").textContent = info.sectionBookingSub;
+
+  // 7. Chân trang (Footer)
+  if (info.name) {
+    document.getElementById("footerSalonName").textContent = info.name;
+  }
+  if (info.address || info.hotline) {
+    document.getElementById("footerSalonContact").textContent =
+      `Địa chỉ: ${info.address || ""} | Hotline: ${info.hotline || ""} | Giờ mở cửa: ${info.openHours || ""}`;
+  }
+  if (info.footerNote !== undefined) {
+    document.getElementById("footerNoteText").textContent = info.footerNote;
+  }
 }
+
+// Kiểm tra URL có phải là Video ngắn không
+function isVideoUrl(url = "") {
+  const u = String(url).toLowerCase().trim();
+  return (
+    u.startsWith("data:video/") ||
+    /\.(mp4|webm|mov|m4v|ogg)(\?|#|$)/i.test(u) ||
+    u.includes("/video/") ||
+    u.includes("youtube.com/embed/")
+  );
+}
+
+// Gom danh sách tất cả Ảnh + Video của 1 Mẫu tóc hoặc Dịch vụ
+function getMediaList(item) {
+  const list = [];
+  if (item.image) list.push(item.image);
+  if (Array.isArray(item.gallery)) {
+    item.gallery.forEach((u) => {
+      if (u && !list.includes(u)) list.push(u);
+    });
+  }
+  if (Array.isArray(item.videos)) {
+    item.videos.forEach((v) => {
+      if (v && !list.includes(v)) list.push(v);
+    });
+  }
+  return list;
+}
+
+let CURRENT_MODAL_MEDIA = [];
+let CURRENT_MODAL_INDEX = 0;
+
+function buildMediaGalleryHtml(item) {
+  CURRENT_MODAL_MEDIA = getMediaList(item);
+  CURRENT_MODAL_INDEX = 0;
+
+  if (CURRENT_MODAL_MEDIA.length === 0) {
+    CURRENT_MODAL_MEDIA = [
+      "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80"
+    ];
+  }
+
+  const total = CURRENT_MODAL_MEDIA.length;
+  return `
+    <div>
+      <div style="position:relative; border-radius:14px; overflow:hidden; background:#090807; border:1px solid var(--border-strong);">
+        <div id="modalMediaStage" style="width:100%; height:380px; display:flex; align-items:center; justify-content:center;">
+          ${renderMediaStageItem(CURRENT_MODAL_MEDIA[0])}
+        </div>
+        ${
+          total > 1
+            ? `
+          <button type="button" onclick="stepModalMedia(-1)" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:1px solid var(--gold-primary); background:rgba(0,0,0,0.75); color:var(--gold-light); cursor:pointer; font-size:16px;">◀</button>
+          <button type="button" onclick="stepModalMedia(1)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:1px solid var(--gold-primary); background:rgba(0,0,0,0.75); color:var(--gold-light); cursor:pointer; font-size:16px;">▶</button>
+          <div id="modalMediaCounter" style="position:absolute; bottom:10px; right:12px; background:rgba(0,0,0,0.78); color:var(--gold-light); font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; border:1px solid var(--border-subtle);">
+            1 / ${total}
+          </div>
+        `
+            : ""
+        }
+      </div>
+
+      ${
+        total > 1
+          ? `<div id="modalMediaThumbs" style="display:flex; gap:8px; margin-top:10px; overflow-x:auto; padding-bottom:4px;">
+              ${CURRENT_MODAL_MEDIA.map((url, idx) => {
+                const isVid = isVideoUrl(url);
+                return `
+                  <div
+                    onclick="selectModalMedia(${idx})"
+                    class="modal-thumb-item"
+                    data-idx="${idx}"
+                    style="position:relative; width:72px; height:72px; border-radius:9px; overflow:hidden; flex-shrink:0; cursor:pointer; border:2px solid ${
+                      idx === 0 ? "var(--gold-primary)" : "rgba(255,255,255,0.15)"
+                    }; background:#12100e;"
+                  >
+                    ${
+                      isVid
+                        ? `<video src="${escapeHtml(url)}" muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+                           <span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); color:#fff; font-size:18px;">▶</span>`
+                        : `<img src="${escapeHtml(url)}" style="width:100%; height:100%; object-fit:cover;" />`
+                    }
+                  </div>
+                `;
+              }).join("")}
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderMediaStageItem(url) {
+  if (isVideoUrl(url)) {
+    return `<video src="${escapeHtml(url)}" controls autoplay playsinline style="width:100%; height:380px; object-fit:contain; background:#000;"></video>`;
+  }
+  return `<img src="${escapeHtml(url)}" style="width:100%; height:380px; object-fit:cover;" alt="Media" />`;
+}
+
+window.selectModalMedia = function (idx) {
+  if (!CURRENT_MODAL_MEDIA.length) return;
+  CURRENT_MODAL_INDEX = (idx + CURRENT_MODAL_MEDIA.length) % CURRENT_MODAL_MEDIA.length;
+  const stage = document.getElementById("modalMediaStage");
+  if (stage) {
+    stage.innerHTML = renderMediaStageItem(CURRENT_MODAL_MEDIA[CURRENT_MODAL_INDEX]);
+  }
+  const counter = document.getElementById("modalMediaCounter");
+  if (counter) {
+    counter.textContent = `${CURRENT_MODAL_INDEX + 1} / ${CURRENT_MODAL_MEDIA.length}`;
+  }
+  document.querySelectorAll(".modal-thumb-item").forEach((el, i) => {
+    el.style.borderColor =
+      i === CURRENT_MODAL_INDEX ? "var(--gold-primary)" : "rgba(255,255,255,0.15)";
+  });
+};
+
+window.stepModalMedia = function (delta) {
+  window.selectModalMedia(CURRENT_MODAL_INDEX + delta);
+};
 
 // ============================================================================
 // 1. RENDER BỘ SƯU TẬP KIỂU TÓC & MODAL CHI TIẾT MẪU TÓC
@@ -139,12 +337,17 @@ function renderHairstyles() {
   grid.innerHTML = filtered
     .map((h) => {
       const stylist = SALON_DATA.staff.find((s) => s.id === h.recommendedStylistId);
+      const mediaAll = getMediaList(h);
+      const videoCount = mediaAll.filter((u) => isVideoUrl(u)).length;
+      const imgCount = mediaAll.length - videoCount;
       return `
       <article class="hair-card">
         <div class="hair-card-img-wrap" onclick="openHairstyleModal('${h.id}')">
           <img src="${escapeHtml(h.image)}" alt="${escapeHtml(h.name)}" loading="lazy" />
           ${h.badge ? `<span class="hair-badge">✨ ${escapeHtml(h.badge)}</span>` : ""}
-          <span class="hair-category-pill">${escapeHtml(h.category)}</span>
+          <span class="hair-category-pill">
+            📸 ${imgCount} ảnh${videoCount > 0 ? ` • 🎥 ${videoCount} video` : ""}
+          </span>
         </div>
         <div class="hair-card-body">
           <h3 class="hair-card-title" onclick="openHairstyleModal('${h.id}')">${escapeHtml(h.name)}</h3>
@@ -159,7 +362,7 @@ function renderHairstyles() {
           </div>
           <div class="hair-card-actions">
             <button type="button" class="btn btn-outline btn-sm" onclick="openHairstyleModal('${h.id}')">
-              👁 Chi Tiết Mẫu
+              👁 Xem Ảnh & Video
             </button>
             <button type="button" class="btn btn-gold btn-sm" onclick="quickBookHairstyle('${h.id}')">
               📅 Đặt Mẫu Này
@@ -176,29 +379,10 @@ window.openHairstyleModal = function (hairstyleId) {
   const h = SALON_DATA.hairstyles.find((item) => item.id === hairstyleId);
   if (!h) return;
   const stylist = SALON_DATA.staff.find((s) => s.id === h.recommendedStylistId);
-  const gallery = h.gallery && h.gallery.length ? h.gallery : [h.image];
 
   const html = `
     <div class="modal-detail-grid">
-      <div>
-        <img id="modalHairMainImg" src="${escapeHtml(gallery[0])}" class="modal-main-img" alt="${escapeHtml(h.name)}" />
-        ${
-          gallery.length > 1
-            ? `<div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto;">
-                ${gallery
-                  .map(
-                    (imgUrl) => `
-                  <img
-                    src="${escapeHtml(imgUrl)}"
-                    onclick="document.getElementById('modalHairMainImg').src='${escapeHtml(imgUrl)}'"
-                    style="width:70px; height:70px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid var(--gold-primary);"
-                  />`
-                  )
-                  .join("")}
-              </div>`
-            : ""
-        }
-      </div>
+      ${buildMediaGalleryHtml(h)}
       <div>
         <div class="section-label">${escapeHtml(h.category)} • ${escapeHtml(h.gender || "Nam/Nữ")}</div>
         <h2 style="font-size:24px; margin-bottom:8px;">${escapeHtml(h.name)}</h2>
@@ -245,7 +429,7 @@ window.openHairstyleModal = function (hairstyleId) {
 };
 
 // ============================================================================
-// 2. RENDER DỊCH VỤ & BẢNG GIÁ CHI TIẾT
+// 2. RENDER DỊCH VỤ & BẢNG GIÁ CHI TIẾT (CÓ ALBUM NHIỀU ẢNH & VIDEO NGẮN)
 // ============================================================================
 function renderServiceTabs() {
   const categories = ["Tất cả", ...new Set(SALON_DATA.services.map((s) => s.category))];
@@ -291,14 +475,23 @@ function renderServices() {
   }
 
   grid.innerHTML = filtered
-    .map(
-      (s) => `
+    .map((s) => {
+      const mediaAll = getMediaList(s);
+      const videoCount = mediaAll.filter((u) => isVideoUrl(u)).length;
+      const imgCount = mediaAll.length - videoCount;
+
+      return `
       <div class="service-card">
         <div class="service-card-top">
-          <img src="${escapeHtml(s.image)}" class="service-thumb" alt="${escapeHtml(s.name)}" loading="lazy" />
+          <div style="position:relative; cursor:pointer;" onclick="openServiceModal('${s.id}')" title="Bấm để xem album ảnh & video thực tế">
+            <img src="${escapeHtml(s.image)}" class="service-thumb" alt="${escapeHtml(s.name)}" loading="lazy" />
+            <span style="position:absolute; bottom:4px; left:4px; right:4px; background:rgba(0,0,0,0.78); color:var(--gold-light); font-size:10px; font-weight:700; text-align:center; padding:2px 4px; border-radius:6px;">
+              📸 ${imgCount} ảnh${videoCount > 0 ? ` • 🎥 ${videoCount} video` : ""}
+            </span>
+          </div>
           <div class="service-head-info">
             <span class="service-cat-badge">${escapeHtml(s.category)}</span>
-            <h3 class="service-title">${escapeHtml(s.name)}</h3>
+            <h3 class="service-title" style="cursor:pointer;" onclick="openServiceModal('${s.id}')">${escapeHtml(s.name)}</h3>
             <div class="service-price-row">
               <span class="service-price-main">${escapeHtml(s.priceDisplay)}</span>
               ${s.originalPriceDisplay ? `<span class="service-price-old">${escapeHtml(s.originalPriceDisplay)}</span>` : ""}
@@ -328,7 +521,7 @@ function renderServices() {
           </div>
           <div class="service-actions">
             <button type="button" class="btn btn-outline btn-sm" style="flex:1;" onclick="openServiceModal('${s.id}')">
-              📋 Quy Trình Chi Tiết
+              🎬 Xem Ảnh, Video & Chi Tiết
             </button>
             <button type="button" class="btn btn-gold btn-sm" style="flex:1;" onclick="quickSelectService('${s.id}')">
               ➕ Chọn Dịch Vụ Này
@@ -336,8 +529,8 @@ function renderServices() {
           </div>
         </div>
       </div>
-    `
-    )
+    `;
+    })
     .join("");
 }
 
@@ -347,9 +540,7 @@ window.openServiceModal = function (serviceId) {
 
   const html = `
     <div class="modal-detail-grid">
-      <div>
-        <img src="${escapeHtml(s.image)}" class="modal-main-img" alt="${escapeHtml(s.name)}" />
-      </div>
+      ${buildMediaGalleryHtml(s)}
       <div>
         <div class="section-label">${escapeHtml(s.category)}</div>
         <h2 style="font-size:23px; margin-bottom:8px;">${escapeHtml(s.name)}</h2>

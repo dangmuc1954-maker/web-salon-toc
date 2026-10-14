@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LUXE HAIR STUDIO - Xem Mẫu Tóc, Bảng Giá, Bảng Màu & Đặt Lịch Stylist</title>
+  <title id="pageTitleEl">LUXE HAIR STUDIO - Xem Mẫu Tóc, Bảng Giá, Bảng Màu & Đặt Lịch Stylist</title>
+  <link id="faviconEl" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✂️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,10 +32,10 @@
   <header class="navbar">
     <div class="container navbar-inner">
       <a href="#" class="brand">
-        <div class="brand-icon">✂</div>
+        <div class="brand-icon" id="brandIconBox">✂</div>
         <div>
           <div class="brand-title" id="brandName">LUXE HAIR STUDIO</div>
-          <div class="brand-sub">Hair Salon & Color Lab</div>
+          <div class="brand-sub" id="brandSubtitle">Hair Salon & Color Lab</div>
         </div>
       </a>
 
@@ -68,9 +69,10 @@
   <section class="hero">
     <div class="container hero-grid">
       <div>
-        <div class="hero-tag">✨ HỆ THỐNG ĐẶT LỊCH & CHỌN ĐÚNG STYLIST YÊU THÍCH</div>
-        <h1 class="hero-title">
-          Khám Phá <span id="heroSalonName">Tất Cả Kiểu Tóc</span>, Bảng Màu & Đặt Lịch Đúng Stylist
+        <div class="hero-tag" id="heroTagText">✨ HỆ THỐNG ĐẶT LỊCH & CHỌN ĐÚNG STYLIST YÊU THÍCH</div>
+        <h1 class="hero-title" id="heroTitleFull">
+          <span id="heroTitlePrefix" style="-webkit-text-fill-color: var(--text-main);">Khám Phá</span>
+          <span id="heroSalonName">Tất Cả Kiểu Tóc</span><span id="heroTitleSuffix" style="-webkit-text-fill-color: var(--text-main);">, Bảng Màu & Đặt Lịch Đúng Stylist</span>
         </h1>
         <p class="hero-desc" id="heroSalonDesc">
           Xem trọn bộ mẫu tóc nam nữ mới nhất kèm mô tả chi tiết, bảng giá dịch vụ minh bạch, bảng màu nhuộm trực quan và đặt lịch hoặc order đúng nhân viên tư vấn chỉ trong 30 giây.
@@ -83,26 +85,26 @@
         <div class="hero-stats">
           <div class="stat-box">
             <strong id="statHairstyles">8+</strong>
-            <span>Mẫu Tóc Thịnh Hành</span>
+            <span id="stat1Label">Mẫu Tóc Thịnh Hành</span>
           </div>
           <div class="stat-box">
             <strong id="statServices">8+</strong>
-            <span>Gói Dịch Vụ Minh Bạch</span>
+            <span id="stat2Label">Gói Dịch Vụ Minh Bạch</span>
           </div>
           <div class="stat-box">
             <strong id="statColors">10+</strong>
-            <span>Mã Màu Nhuộm Chuẩn</span>
+            <span id="stat3Label">Mã Màu Nhuộm Chuẩn</span>
           </div>
           <div class="stat-box">
             <strong id="statStaff">6+</strong>
-            <span>Master & Senior Stylist</span>
+            <span id="stat4Label">Master & Senior Stylist</span>
           </div>
         </div>
       </div>
       <div class="hero-visual">
         <div class="hero-collage">
-          <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80" alt="Mẫu tóc Layer Sóng Lơi" />
-          <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80" alt="Nhuộm Balayage" />
+          <img id="heroImg1" src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80" alt="Mẫu tóc 1" />
+          <img id="heroImg2" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80" alt="Mẫu tóc 2" />
         </div>
       </div>
     </div>
@@ -114,8 +116,8 @@
       <div class="section-header">
         <div>
           <div class="section-label">BỘ SƯU TẬP MẪU TÓC</div>
-          <h2 class="section-title">Xem Tất Cả Kiểu Tóc & Mô Tả Chi Tiết</h2>
-          <p class="section-sub">Bấm vào từng ảnh mẫu tóc để xem chi tiết kỹ thuật cắt/uốn/nhuộm, khuôn mặt phù hợp, thời gian làm và chọn nhân viên thực hiện.</p>
+          <h2 class="section-title" id="secHairTitle">Xem Tất Cả Kiểu Tóc & Mô Tả Chi Tiết</h2>
+          <p class="section-sub" id="secHairSub">Bấm vào từng ảnh mẫu tóc để xem chi tiết kỹ thuật cắt/uốn/nhuộm, khuôn mặt phù hợp, thời gian làm và chọn nhân viên thực hiện.</p>
         </div>
       </div>
 
@@ -139,8 +141,8 @@
       <div class="section-header">
         <div>
           <div class="section-label">BẢNG GIÁ MINH BẠCH</div>
-          <h2 class="section-title">Tất Cả Dịch Vụ Làm Tóc & Chi Tiết Giá</h2>
-          <p class="section-sub">Cam kết báo đúng giá theo gói dịch vụ, sử dụng thuốc chính hãng và bảo hành miễn phí rõ ràng cho từng dịch vụ.</p>
+          <h2 class="section-title" id="secServiceTitle">Tất Cả Dịch Vụ Làm Tóc & Chi Tiết Giá</h2>
+          <p class="section-sub" id="secServiceSub">Cam kết báo đúng giá theo gói dịch vụ, sử dụng thuốc chính hãng và bảo hành miễn phí rõ ràng cho từng dịch vụ.</p>
         </div>
       </div>
 
@@ -164,8 +166,8 @@
       <div class="section-header">
         <div>
           <div class="section-label">HAIR COLOR CHART</div>
-          <h2 class="section-title">Bảng Màu Sắc Tóc & Tư Vấn Tông Da</h2>
-          <p class="section-sub">Khám phá các mã màu nhuộm từ Nâu Công Sở không cần tẩy đến Balayage / Khói thời thượng. Bấm vào màu bất kỳ để xem chi tiết & chọn nhuộm.</p>
+          <h2 class="section-title" id="secColorTitle">Bảng Màu Sắc Tóc & Tư Vấn Tông Da</h2>
+          <p class="section-sub" id="secColorSub">Khám phá các mã màu nhuộm từ Nâu Công Sở không cần tẩy đến Balayage / Khói thời thượng. Bấm vào màu bất kỳ để xem chi tiết & chọn nhuộm.</p>
         </div>
       </div>
 
@@ -189,8 +191,8 @@
       <div class="section-header">
         <div>
           <div class="section-label">ĐỘI NGŨ CHUYÊN GIA</div>
-          <h2 class="section-title">Chọn Nhân Viên Tư Vấn & Đặt Lịch Đúng Stylist</h2>
-          <p class="section-sub">Mỗi Stylist có thế mạnh riêng và thông tin số điện thoại / Zalo trực tiếp. Quý khách có thể Order nhân viên tư vấn hoặc Đặt lịch đích danh nhân viên mình yêu thích.</p>
+          <h2 class="section-title" id="secStaffTitle">Chọn Nhân Viên Tư Vấn & Đặt Lịch Đúng Stylist</h2>
+          <p class="section-sub" id="secStaffSub">Mỗi Stylist có thế mạnh riêng và thông tin số điện thoại / Zalo trực tiếp. Quý khách có thể Order nhân viên tư vấn hoặc Đặt lịch đích danh nhân viên mình yêu thích.</p>
         </div>
         <input
           type="text"
@@ -211,8 +213,8 @@
         <div class="section-header" style="margin-bottom: 20px;">
           <div>
             <div class="section-label">ĐẶT LỊCH & ORDER TƯ VẤN TRỰC TUYẾN</div>
-            <h2 class="section-title">Gửi Yêu Cầu Về Salon & Nhận SĐT Nhân Viên Ngay</h2>
-            <p class="section-sub">Sau khi bấm gửi, đơn của quý khách sẽ được chuyển ngay về máy chủ Salon & thông báo cho đúng nhân viên phụ trách, đồng thời hiển thị SĐT/Zalo của nhân viên đó để quý khách liên lạc trực tiếp.</p>
+            <h2 class="section-title" id="secBookingTitle">Gửi Yêu Cầu Về Salon & Nhận SĐT Nhân Viên Ngay</h2>
+            <p class="section-sub" id="secBookingSub">Sau khi bấm gửi, đơn của quý khách sẽ được chuyển ngay về máy chủ Salon & thông báo cho đúng nhân viên phụ trách, đồng thời hiển thị SĐT/Zalo của nhân viên đó để quý khách liên lạc trực tiếp.</p>
           </div>
         </div>
 
@@ -241,7 +243,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Chọn Đúng Nhân Viên / Stylist Phụ Trách *</label>
+              <label class="form-label">Chọn Đúng Nhân Viên / Stylist *</label>
               <select id="staffSelect" class="form-control"></select>
             </div>
 
@@ -303,9 +305,7 @@
     <div class="container">
       <p style="color: var(--gold-light); font-weight: 700; font-size: 15px; margin-bottom: 6px;" id="footerSalonName">LUXE HAIR STUDIO & ACADEMY</p>
       <p id="footerSalonContact">Địa chỉ: 128 Nguyễn Trãi, Quận 1, TP.HCM | Hotline: 0909888999</p>
-      <p style="margin-top: 10px;">
-        Dữ liệu mẫu tóc, bảng giá, bảng màu và nhân viên được cấu hình trực tiếp tại file <code>data/salon-config.js</code>
-      </p>
+      <p style="margin-top: 8px;" id="footerNoteText">Hệ thống Đặt lịch làm tóc & Tư vấn Stylist trực tuyến 24/7.</p>
     </div>
   </footer>
 

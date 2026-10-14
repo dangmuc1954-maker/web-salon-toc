@@ -20,8 +20,8 @@ const STATE_BLOB_KEY = "salon_toc_state.json";
 const ORDERS_BLOB_KEY = "salon_toc_orders.json";
 
 app.use(cors());
-app.use(express.json({ limit: "25mb" }));
-app.use(express.urlencoded({ extended: true, limit: "25mb" }));
+app.use(express.json({ limit: "60mb" }));
+app.use(express.urlencoded({ extended: true, limit: "60mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
 const DATA_DIR = path.join(__dirname, "data");
@@ -102,12 +102,21 @@ function loadSalonData() {
   if (fs.existsSync(CUSTOM_DATA_FILE)) {
     try {
       const parsed = JSON.parse(fs.readFileSync(CUSTOM_DATA_FILE, "utf8"));
+      const mergedServices = (Array.isArray(parsed.services) ? parsed.services : defaultConfig.services).map((srv) => {
+        const defSrv = defaultConfig.services.find((d) => d.id === srv.id);
+        return {
+          ...srv,
+          gallery: Array.isArray(srv.gallery) && srv.gallery.length
+            ? srv.gallery
+            : (defSrv && Array.isArray(defSrv.gallery) ? defSrv.gallery : [srv.image].filter(Boolean))
+        };
+      });
       memoryState = {
-        salonInfo: parsed.salonInfo || defaultConfig.salonInfo,
-        notifications: parsed.notifications || defaultConfig.notifications,
+        salonInfo: { ...defaultConfig.salonInfo, ...(parsed.salonInfo || {}) },
+        notifications: { ...defaultConfig.notifications, ...(parsed.notifications || {}) },
         staff: Array.isArray(parsed.staff) ? parsed.staff : defaultConfig.staff,
         hairstyles: Array.isArray(parsed.hairstyles) ? parsed.hairstyles : defaultConfig.hairstyles,
-        services: Array.isArray(parsed.services) ? parsed.services : defaultConfig.services,
+        services: mergedServices,
         colors: Array.isArray(parsed.colors) ? parsed.colors : defaultConfig.colors
       };
       return memoryState;
@@ -455,19 +464,27 @@ app.post("/api/admin/upload-image", async (req, res) => {
     return res.status(401).json({ ok: false, error: "Sai mật khẩu Quản trị." });
   }
   try {
-    const { base64Data, fileName = "image.jpg" } = req.body || {};
-    if (!base64Data || !base64Data.startsWith("data:image/")) {
-      return res.status(400).json({ ok: false, error: "Dữ liệu ảnh không hợp lệ." });
+    const { base64Data, fileName = "media.jpg" } = req.body || {};
+    if (
+      !base64Data ||
+      (!base64Data.startsWith("data:image/") && !base64Data.startsWith("data:video/"))
+    ) {
+      return res.status(400).json({
+        ok: false,
+        error: "Dữ liệu phải là Hình ảnh hoặc Video ngắn (MP4/WEBM/MOV)."
+      });
     }
 
-    const matches = base64Data.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+    const matches = base64Data.match(/^data:(image|video)\/([a-zA-Z0-9.+-]+);base64,(.+)$/);
     if (!matches) {
-      return res.status(400).json({ ok: false, error: "Định dạng ảnh Base64 không hợp lệ." });
+      return res.status(400).json({ ok: false, error: "Định dạng file tải lên không hợp lệ." });
     }
 
-    let ext = matches[1].toLowerCase();
+    const mediaType = matches[1]; // 'image' | 'video'
+    let ext = matches[2].toLowerCase();
     if (ext === "jpeg") ext = "jpg";
-    const buffer = Buffer.from(matches[2], "base64");
+    if (ext === "quicktime") ext = "mov";
+    const buffer = Buffer.from(matches[3], "base64");
 
     const cleanName = path
       .basename(fileName, path.extname(fileName))
@@ -475,20 +492,20 @@ app.post("/api/admin/upload-image", async (req, res) => {
       .slice(0, 40);
     const savedFileName = `${Date.now()}-${cleanName || "salon"}.${ext}`;
 
-    // Nếu có Vercel Blob Token -> Upload thẳng lên Cloud để giữ ảnh vĩnh viễn trên Vercel
+    // Nếu có Vercel Blob Token -> Upload thẳng lên Cloud để giữ ảnh/video vĩnh viễn trên Vercel
     if (vercelBlobPut && process.env.BLOB_READ_WRITE_TOKEN) {
       try {
         const blobResult = await vercelBlobPut(`salon_uploads/${savedFileName}`, buffer, {
           access: "public",
           addRandomSuffix: false,
           allowOverwrite: true,
-          contentType: `image/${ext === "jpg" ? "jpeg" : ext}`
+          contentType: `${mediaType}/${ext === "jpg" ? "jpeg" : ext}`
         });
         if (blobResult && blobResult.url) {
-          return res.json({ ok: true, url: blobResult.url });
+          return res.json({ ok: true, url: blobResult.url, mediaType });
         }
       } catch (blobErr) {
-        console.warn("Fallback sang Base64/local vì lỗi Blob:", blobErr.message);
+        console.warn("Fallback sang local vì lỗi Blob:", blobErr.message);
       }
     }
 
@@ -496,11 +513,11 @@ app.post("/api/admin/upload-image", async (req, res) => {
     if (!IS_VERCEL) {
       const filePath = path.join(UPLOADS_DIR, savedFileName);
       fs.writeFileSync(filePath, buffer);
-      return res.json({ ok: true, url: `/images/uploads/${savedFileName}` });
+      return res.json({ ok: true, url: `/images/uploads/${savedFileName}`, mediaType });
     }
 
-    // Fallback trên Serverless không có Blob: Trả về Data URL đã nén nhẹ
-    return res.json({ ok: true, url: base64Data });
+    // Fallback trên Serverless
+    return res.json({ ok: true, url: base64Data, mediaType });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }

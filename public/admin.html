@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bàn Quản Trị Salon - Tự Sửa Thông Tin, Giá, Nhân Viên & Đổi Hình Web</title>
+  <title>Bàn Quản Trị Salon - Tự Sửa Mọi Thông Tin, Logo, Giới Thiệu, Giá & Đổi Hình Web</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
   <style>
     .admin-layout {
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 280px 1fr;
       min-height: calc(100vh - 75px);
     }
     .admin-sidebar {
@@ -117,6 +117,24 @@
       background: #0f0d0c;
       flex-shrink: 0;
     }
+    .settings-group-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+    .settings-group-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     .toast-banner {
       position: fixed;
       bottom: 24px;
@@ -175,7 +193,7 @@
       <div class="brand-icon" style="margin: 0 auto 14px; width:56px; height:56px; font-size:26px;">🛠️</div>
       <h2 style="font-size:22px; margin-bottom:6px;">Bàn Quản Trị Salon Tóc</h2>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
-        Nhập mật khẩu quản lý để tự thêm/sửa Mẫu tóc, Dịch vụ, Bảng giá, Bảng màu, Nhân viên và tải ảnh lên web.
+        Nhập mật khẩu quản lý để tự chỉnh sửa Tên tiệm, Logo/Icon, Lời giới thiệu, Địa chỉ, Hotline, Mẫu tóc, Dịch vụ, Bảng màu, Nhân viên và tải ảnh lên web.
       </p>
       <form id="adminLoginForm">
         <div class="form-group" style="text-align:left;">
@@ -197,7 +215,7 @@
         <div class="brand-icon">🛠️</div>
         <div>
           <div class="brand-title">BÀN QUẢN TRỊ SALON (ADMIN CMS)</div>
-          <div class="brand-sub">Sửa thông tin & Đổi hình trực tiếp — Cập nhật tức thì lên Web</div>
+          <div class="brand-sub">Tự sửa mọi thông tin, Logo, Giới thiệu, Địa chỉ, Hotline & Đổi hình trực tiếp</div>
         </div>
       </div>
 
@@ -212,31 +230,311 @@
   <div class="admin-layout">
     <!-- THANH MENU BÊN TRÁI -->
     <aside class="admin-sidebar">
-      <button type="button" class="admin-nav-btn active" data-tab="tab-hairstyles">
-        💇‍♀️ 1. Mẫu Tóc & Ảnh Mẫu (<span id="countHairstyles">0</span>)
+      <button type="button" class="admin-nav-btn active" data-tab="tab-settings">
+        🏛️ 1. Thương Hiệu, Logo, Giới Thiệu & Địa Chỉ
+      </button>
+      <button type="button" class="admin-nav-btn" data-tab="tab-hairstyles">
+        💇‍♀️ 2. Mẫu Tóc & Ảnh Mẫu (<span id="countHairstyles">0</span>)
       </button>
       <button type="button" class="admin-nav-btn" data-tab="tab-services">
-        💎 2. Dịch Vụ & Bảng Giá (<span id="countServices">0</span>)
+        💎 3. Dịch Vụ & Bảng Giá (<span id="countServices">0</span>)
       </button>
       <button type="button" class="admin-nav-btn" data-tab="tab-staff">
-        👨‍🎨 3. Nhân Viên & SĐT (<span id="countStaff">0</span>)
+        👨‍🎨 4. Nhân Viên & SĐT (<span id="countStaff">0</span>)
       </button>
       <button type="button" class="admin-nav-btn" data-tab="tab-colors">
-        🎨 4. Bảng Màu Sắc (<span id="countColors">0</span>)
+        🎨 5. Bảng Màu Sắc (<span id="countColors">0</span>)
       </button>
       <button type="button" class="admin-nav-btn" data-tab="tab-orders">
-        📋 5. Đơn Khách Đặt Lịch (<span id="countOrders">0</span>)
-      </button>
-      <button type="button" class="admin-nav-btn" data-tab="tab-settings">
-        ⚙️ 6. Thông Tin Quán & Telegram
+        📋 6. Đơn Khách Đặt Lịch (<span id="countOrders">0</span>)
       </button>
     </aside>
 
     <!-- NỘI DUNG TỪNG MỤC -->
     <main class="admin-content">
 
-      <!-- TAB 1: QUẢN LÝ MẪU TÓC -->
-      <section class="admin-panel active" id="tab-hairstyles">
+      <!-- TAB 1: CHỈNH SỬA TOÀN BỘ THƯƠNG HIỆU, ICON/LOGO, TÊN LUXE SALON, GIỚI THIỆU WEB, ĐỊA CHỈ, HOTLINE -->
+      <section class="admin-panel active" id="tab-settings">
+        <div class="admin-top-bar">
+          <div>
+            <h2 class="section-title">🏛️ Chỉnh Sửa Toàn Bộ Thương Hiệu, Icon/Logo, Giới Thiệu Web, Địa Chỉ & Hotline</h2>
+            <p class="section-sub">Anh sửa bất kỳ chữ hoặc ảnh nào dưới đây rồi bấm nút "Lưu Toàn Bộ Thay Đổi Lên Web" là trang chính đổi ngay lập tức.</p>
+          </div>
+          <button type="button" class="btn btn-gold" onclick="document.getElementById('salonSettingsForm').requestSubmit()">
+            💾 Lưu Toàn Bộ Thay Đổi Lên Web
+          </button>
+        </div>
+
+        <form id="salonSettingsForm">
+          <!-- NHÓM A: ICON WEB, LOGO & TÊN THƯƠNG HIỆU (CHỖ LUXE HAIR STUDIO / HAIR SALON & COLOR LAB) -->
+          <div class="settings-group-card">
+            <div class="settings-group-title">
+              ✨ A. Icon Web, Ảnh Logo & Tên Chỗ "LUXE HAIR STUDIO - Hair Salon & Color Lab"
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Tên Thương Hiệu Chính (Chữ lớn cạnh Logo, VD: LUXE HAIR STUDIO)</label>
+                <input type="text" id="setShortName" class="form-control" placeholder="VD: LUXE HAIR STUDIO" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Dòng Chữ Nhỏ Dưới Tên Thương Hiệu (Chỗ "Hair Salon & Color Lab")</label>
+                <input type="text" id="setBrandSubtitle" class="form-control" placeholder="VD: Hair Salon & Color Lab" />
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Ký Hiệu Icon Web (Nếu không dùng ảnh Logo riêng, VD: ✂, 👑, 💎, 💇‍♀️)</label>
+                <input type="text" id="setLogoIconText" class="form-control" placeholder="✂" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tiêu Đề Tab Trình Duyệt (Hiện trên thanh tab Chrome/Safari)</label>
+                <input type="text" id="setPageTitle" class="form-control" placeholder="Tên hiển thị trên tab trình duyệt..." />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Ảnh Logo / Icon Web Riêng (Nếu tải ảnh lên sẽ thay thế ô biểu tượng ✂ và làm Icon Tab Web)</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="setLogoImageUrl" class="form-control" placeholder="Để trống nếu muốn dùng biểu tượng chữ ✂ ở trên, hoặc tải ảnh Logo lên..." />
+                <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('setLogoImageUrl').value=''; document.getElementById('previewLogoImg').src='';">Xóa Ảnh Logo</button>
+              </div>
+              <div class="upload-box">
+                <img id="previewLogoImg" src="" class="upload-preview" alt="Logo" />
+                <div style="flex:1;">
+                  <label class="btn btn-gold btn-sm" style="cursor:pointer; margin-bottom:4px;">
+                    📤 Tải Ảnh Logo / Icon Từ Máy Hoặc Điện Thoại
+                    <input type="file" id="fileLogoUpload" accept="image/*" style="display:none;" />
+                  </label>
+                  <div style="font-size:12px; color:var(--text-muted);" id="statusLogoUpload">Chọn ảnh vuông (PNG/JPG) để làm Logo góc trái web & Icon trình duyệt.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Tên Đầy Đủ Của Salon (Hiện ở cuối trang Footer)</label>
+              <input type="text" id="setSalonName" class="form-control" placeholder="VD: LUXE HAIR STUDIO & ACADEMY" required />
+            </div>
+          </div>
+
+          <!-- NHÓM B: ĐỊA CHỈ, HOTLINE, GIỜ MỞ CỬA & KHUNG GIỜ ĐẶT LỊCH -->
+          <div class="settings-group-card">
+            <div class="settings-group-title">
+              📍 B. Địa Chỉ, Số Hotline, Giờ Mở Cửa & Khung Giờ Nhận Đặt Lịch
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">📞 Số Điện Thoại Hotline Chính Của Salon</label>
+                <input type="text" id="setHotline" class="form-control" placeholder="VD: 0909888999" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">🕒 Giờ Mở Cửa (Hiện ở thanh trên cùng & cuối trang)</label>
+                <input type="text" id="setOpenHours" class="form-control" placeholder="VD: 08:30 - 21:00 (Thứ 2 - Chủ Nhật)" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">📍 Địa Chỉ Salon (Hiện ở thanh trên cùng & cuối trang)</label>
+              <input type="text" id="setAddress" class="form-control" placeholder="VD: 128 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh" />
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">⏰ Danh Sách Khung Giờ Cho Khách Chọn Đặt Lịch (Cách nhau bằng dấu phẩy)</label>
+              <input type="text" id="setTimeSlots" class="form-control" placeholder="08:30, 09:00, 09:30, 10:00, 14:00, 15:00..." />
+            </div>
+          </div>
+
+          <!-- NHÓM C: PHẦN GIỚI THIỆU ĐẦU TRANG WEB (HERO BANNER & 2 ẢNH ĐẦU TRANG) -->
+          <div class="settings-group-card">
+            <div class="settings-group-title">
+              🌟 C. Phần Giới Thiệu Đầu Trang Web (Tiêu Đề Lớn, Đoạn Văn Giới Thiệu & 2 Ảnh Banner)
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Dòng Nhãn Nhỏ Phía Trên Tiêu Đề Giới Thiệu</label>
+              <input type="text" id="setHeroTag" class="form-control" placeholder="✨ HỆ THỐNG ĐẶT LỊCH & CHỌN ĐÚNG STYLIST YÊU THÍCH" />
+            </div>
+
+            <div class="form-row-2" style="grid-template-columns: 0.8fr 1.1fr 1.3fr;">
+              <div class="form-group">
+                <label class="form-label">Chữ Đầu Tiêu Đề Lớn</label>
+                <input type="text" id="setHeroTitlePrefix" class="form-control" placeholder="Khám Phá" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Chữ Nổi Bật Màu Vàng Kim</label>
+                <input type="text" id="setHeroTitleHighlight" class="form-control" placeholder="Tất Cả Kiểu Tóc" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Chữ Đuôi Tiêu Đề Lớn</label>
+                <input type="text" id="setHeroTitleSuffix" class="form-control" placeholder=", Bảng Màu & Đặt Lịch Đúng Stylist" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">📝 Đoạn Văn Giới Thiệu Chi Tiết Của Website (Hiện ngay dưới tiêu đề lớn)</label>
+              <textarea id="setDescription" rows="3" class="form-control" placeholder="Nhập lời giới thiệu về Salon của anh..."></textarea>
+            </div>
+
+            <!-- 2 ẢNH BANNER GIỚI THIỆU ĐẦU TRANG -->
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Ảnh Giới Thiệu Đầu Trang Số 1 (Bên trái)</label>
+                <input type="text" id="setHeroImage1" class="form-control" />
+                <div class="upload-box">
+                  <img id="previewHero1" src="" class="upload-preview" />
+                  <div style="flex:1;">
+                    <label class="btn btn-gold btn-sm" style="cursor:pointer;">
+                      📤 Đổi Ảnh Giới Thiệu 1
+                      <input type="file" id="fileHero1" accept="image/*" style="display:none;" />
+                    </label>
+                    <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;" id="statusHero1">Tải từ máy/điện thoại</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Ảnh Giới Thiệu Đầu Trang Số 2 (Bên phải)</label>
+                <input type="text" id="setHeroImage2" class="form-control" />
+                <div class="upload-box">
+                  <img id="previewHero2" src="" class="upload-preview" />
+                  <div style="flex:1;">
+                    <label class="btn btn-gold btn-sm" style="cursor:pointer;">
+                      📤 Đổi Ảnh Giới Thiệu 2
+                      <input type="file" id="fileHero2" accept="image/*" style="display:none;" />
+                    </label>
+                    <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;" id="statusHero2">Tải từ máy/điện thoại</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 Ô THỐNG KÊ DƯỚI PHẦN GIỚI THIỆU -->
+            <div class="form-row-2" style="grid-template-columns: repeat(4, 1fr);">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Nhãn Thống Kê 1</label>
+                <input type="text" id="setStat1Label" class="form-control" placeholder="Mẫu Tóc Thịnh Hành" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Nhãn Thống Kê 2</label>
+                <input type="text" id="setStat2Label" class="form-control" placeholder="Gói Dịch Vụ Minh Bạch" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Nhãn Thống Kê 3</label>
+                <input type="text" id="setStat3Label" class="form-control" placeholder="Mã Màu Nhuộm Chuẩn" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Nhãn Thống Kê 4</label>
+                <input type="text" id="setStat4Label" class="form-control" placeholder="Master & Senior Stylist" />
+              </div>
+            </div>
+          </div>
+
+          <!-- NHÓM D: TIÊU ĐỀ & LỜI DẪN CỦA CÁC MỤC TRÊN WEB + CHÂN TRANG -->
+          <div class="settings-group-card">
+            <div class="settings-group-title">
+              📑 D. Tiêu Đề & Lời Giới Thiệu Của Từng Mục Trên Web (Mẫu Tóc, Dịch Vụ, Bảng Màu, Nhân Viên, Chân Trang)
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Tiêu Đề Mục 1 (Mẫu Tóc)</label>
+                <input type="text" id="setSecHairTitle" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mô Tả Phụ Mục 1 (Mẫu Tóc)</label>
+                <input type="text" id="setSecHairSub" class="form-control" />
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Tiêu Đề Mục 2 (Dịch Vụ & Giá)</label>
+                <input type="text" id="setSecServiceTitle" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mô Tả Phụ Mục 2 (Dịch Vụ & Giá)</label>
+                <input type="text" id="setSecServiceSub" class="form-control" />
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Tiêu Đề Mục 3 (Bảng Màu)</label>
+                <input type="text" id="setSecColorTitle" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mô Tả Phụ Mục 3 (Bảng Màu)</label>
+                <input type="text" id="setSecColorSub" class="form-control" />
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Tiêu Đề Mục 4 (Đội Ngũ Nhân Viên)</label>
+                <input type="text" id="setSecStaffTitle" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mô Tả Phụ Mục 4 (Đội Ngũ Nhân Viên)</label>
+                <input type="text" id="setSecStaffSub" class="form-control" />
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Tiêu Đề Mục 5 (Form Đặt Lịch)</label>
+                <input type="text" id="setSecBookingTitle" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mô Tả Phụ Mục 5 (Form Đặt Lịch)</label>
+                <input type="text" id="setSecBookingSub" class="form-control" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Dòng Chữ Ghi Chú Ở Cuối Trang (Footer)</label>
+              <input type="text" id="setFooterNote" class="form-control" />
+            </div>
+          </div>
+
+          <!-- NHÓM E: TELEGRAM / ZALO & MẬT KHẨU QUẢN TRỊ -->
+          <div class="settings-group-card">
+            <div class="settings-group-title">
+              🔔 E. Cài Đặt Nhận Thông Báo Đơn Hàng (Telegram / Zalo) & Mật Khẩu Admin
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Telegram Bot Token (Từ @BotFather)</label>
+                <input type="text" id="setTgToken" class="form-control" placeholder="VD: 712345678:AAH..." />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Telegram Chat ID (ID cá nhân hoặc Nhóm Salon)</label>
+                <input type="text" id="setTgChatId" class="form-control" placeholder="VD: -100123456789" />
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Zalo Webhook URL (Nếu dùng Make / n8n / Zalo OA)</label>
+                <input type="text" id="setZaloWebhook" class="form-control" placeholder="https://..." />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Mật Khẩu Đăng Nhập Bàn Quản Trị Này</label>
+                <input type="text" id="setAdminPasscode" class="form-control" placeholder="Mặc định: 123456" />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-gold" style="width:100%; padding:16px; font-size:16px;">
+            💾 LƯU TOÀN BỘ THÔNG TIN GIAO DIỆN, LOGO, GIỚI THIỆU & ĐỊA CHỈ LÊN WEB
+          </button>
+        </form>
+      </section>
+
+      <!-- TAB 2: QUẢN LÝ MẪU TÓC -->
+      <section class="admin-panel" id="tab-hairstyles">
         <div class="admin-top-bar">
           <div>
             <h2 class="section-title">💇‍♀️ Quản Lý Tất Cả Mẫu Tóc & Ảnh</h2>
@@ -249,7 +547,7 @@
         <div class="admin-item-grid" id="adminHairstylesList"></div>
       </section>
 
-      <!-- TAB 2: QUẢN LÝ DỊCH VỤ & BẢNG GIÁ -->
+      <!-- TAB 3: QUẢN LÝ DỊCH VỤ & BẢNG GIÁ -->
       <section class="admin-panel" id="tab-services">
         <div class="admin-top-bar">
           <div>
@@ -263,7 +561,7 @@
         <div class="admin-item-grid" id="adminServicesList"></div>
       </section>
 
-      <!-- TAB 3: QUẢN LÝ NHÂN VIÊN & SĐT LIÊN LẠC -->
+      <!-- TAB 4: QUẢN LÝ NHÂN VIÊN & SĐT LIÊN LẠC -->
       <section class="admin-panel" id="tab-staff">
         <div class="admin-top-bar">
           <div>
@@ -277,7 +575,7 @@
         <div class="admin-item-grid" id="adminStaffList"></div>
       </section>
 
-      <!-- TAB 4: QUẢN LÝ BẢNG MÀU SẮC -->
+      <!-- TAB 5: QUẢN LÝ BẢNG MÀU SẮC -->
       <section class="admin-panel" id="tab-colors">
         <div class="admin-top-bar">
           <div>
@@ -291,7 +589,7 @@
         <div class="admin-item-grid" id="adminColorsList"></div>
       </section>
 
-      <!-- TAB 5: QUẢN LÝ ĐƠN KHÁCH ĐẶT LỊCH -->
+      <!-- TAB 6: QUẢN LÝ ĐƠN KHÁCH ĐẶT LỊCH -->
       <section class="admin-panel" id="tab-orders">
         <div class="admin-top-bar">
           <div>
@@ -303,79 +601,6 @@
           </button>
         </div>
         <div id="adminOrdersContainer" style="display:grid; gap:14px;"></div>
-      </section>
-
-      <!-- TAB 6: CÀI ĐẶT THÔNG TIN SALON & TELEGRAM -->
-      <section class="admin-panel" id="tab-settings">
-        <div class="admin-top-bar">
-          <div>
-            <h2 class="section-title">⚙️ Thông Tin Chung Salon & Thông Báo Telegram / Zalo</h2>
-            <p class="section-sub">Chỉnh sửa tên tiệm, địa chỉ, hotline, giờ mở cửa và mã nhận thông báo tự động khi có khách đặt lịch.</p>
-          </div>
-        </div>
-
-        <form id="salonSettingsForm" style="background:var(--bg-card); padding:24px; border-radius:16px; border:1px solid var(--border-subtle);">
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Tên Đầy Đủ Của Salon</label>
-              <input type="text" id="setSalonName" class="form-control" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tên Ngắn Gọn (Hiện Trên Logo)</label>
-              <input type="text" id="setShortName" class="form-control" required />
-            </div>
-          </div>
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Số Điện Thoại Hotline Chính</label>
-              <input type="text" id="setHotline" class="form-control" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Giờ Mở Cửa</label>
-              <input type="text" id="setOpenHours" class="form-control" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Địa Chỉ Salon</label>
-            <input type="text" id="setAddress" class="form-control" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Mô Tả Giới Thiệu Đầu Trang</label>
-            <textarea id="setDescription" rows="2" class="form-control"></textarea>
-          </div>
-
-          <hr style="border:none; border-top:1px solid var(--border-subtle); margin:20px 0;" />
-          <h3 style="margin-bottom:14px; color:var(--gold-light);">🔔 Cài Đặt Nhận Thông Báo Đơn Hàng & Mật Khẩu Quản Trị</h3>
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Telegram Bot Token (Từ @BotFather)</label>
-              <input type="text" id="setTgToken" class="form-control" placeholder="VD: 712345678:AAH..." />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Telegram Chat ID (ID cá nhân hoặc Nhóm Salon)</label>
-              <input type="text" id="setTgChatId" class="form-control" placeholder="VD: -100123456789" />
-            </div>
-          </div>
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Zalo Webhook URL (Nếu dùng Make / n8n / Zalo OA)</label>
-              <input type="text" id="setZaloWebhook" class="form-control" placeholder="https://..." />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Mật Khẩu Đăng Nhập Bàn Quản Trị Này</label>
-              <input type="text" id="setAdminPasscode" class="form-control" placeholder="Mặc định: 123456" />
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-gold" style="padding:14px 28px; font-size:15px;">
-            💾 Lưu Cài Đặt Salon Lên Web
-          </button>
-        </form>
       </section>
 
     </main>

@@ -111,9 +111,42 @@ async function saveFullDataToServer(toastMessage) {
 }
 
 /**
- * Nén nhẹ ảnh trên trình duyệt và tải lên máy chủ -> Trả về đường dẫn ảnh trên web
+ * Nén nhẹ ảnh hoặc đọc file Video ngắn trên trình duyệt và tải lên máy chủ -> Trả về đường dẫn trên web
  */
 async function uploadImageFile(file) {
+  // Nếu là file Video ngắn (MP4, MOV, WEBM) -> đọc trực tiếp Base64 và gửi lên server
+  if (file.type && file.type.startsWith("video/")) {
+    return new Promise((resolve, reject) => {
+      if (file.size > 45 * 1024 * 1024) {
+        return reject(new Error("Video quá lớn (vui lòng chọn video ngắn dưới 45MB)."));
+      }
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const res = await fetch("/api/admin/upload-image", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-admin-passcode": ADMIN_PASS
+            },
+            body: JSON.stringify({
+              base64Data: ev.target.result,
+              fileName: file.name || "salon-video.mp4"
+            })
+          });
+          const data = await res.json();
+          if (data.ok) resolve(data.url);
+          else reject(new Error(data.error || "Upload video thất bại"));
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error("Không thể đọc file video."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Nếu là Hình ảnh -> nén chuẩn HD và gửi lên server
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -162,6 +195,127 @@ async function uploadImageFile(file) {
   });
 }
 
+function isVideoMedia(url = "") {
+  const u = String(url).toLowerCase().trim();
+  return (
+    u.startsWith("data:video/") ||
+    /\.(mp4|webm|mov|m4v|ogg)(\?|#|$)/i.test(u) ||
+    u.includes("/video/")
+  );
+}
+
+let EDITOR_GALLERY = [];
+
+function renderEditorGalleryBox(coverInputId, coverPreviewId) {
+  const wrap = document.getElementById("editorGalleryItems");
+  if (!wrap) return;
+  const currentCover = document.getElementById(coverInputId)
+    ? document.getElementById(coverInputId).value.trim()
+    : "";
+
+  if (EDITOR_GALLERY.length === 0) {
+    wrap.innerHTML = `<div style="font-size:12.5px; color:var(--text-dim); padding:8px;">Chưa có ảnh/video phụ nào. Bấm nút bên dưới để tải thêm nhiều ảnh và video ngắn!</div>`;
+    return;
+  }
+
+  wrap.innerHTML = EDITOR_GALLERY.map((url, idx) => {
+    const isVid = isVideoMedia(url);
+    const isCover = url === currentCover;
+    return `
+      <div style="position:relative; width:104px; background:#0f0d0c; border:2px solid ${
+        isCover ? "var(--gold-primary)" : "rgba(255,255,255,0.14)"
+      }; border-radius:10px; overflow:hidden; flex-shrink:0;">
+        <div style="height:82px; position:relative; background:#000;">
+          ${
+            isVid
+              ? `<video src="${escapeHtml(url)}" muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+                 <span style="position:absolute; top:4px; left:4px; background:rgba(220,38,38,0.9); color:#fff; font-size:9px; font-weight:700; padding:2px 5px; border-radius:4px;">🎥 VIDEO</span>`
+              : `<img src="${escapeHtml(url)}" style="width:100%; height:100%; object-fit:cover;" />`
+          }
+          ${
+            isCover
+              ? `<span style="position:absolute; bottom:4px; left:4px; background:var(--gold-primary); color:#111; font-size:9px; font-weight:800; padding:1px 5px; border-radius:4px;">Ảnh Bìa</span>`
+              : ""
+          }
+        </div>
+        <div style="display:flex; border-top:1px solid rgba(255,255,255,0.08);">
+          ${
+            !isVid
+              ? `<button type="button" onclick="setAsEditorCover(${idx}, '${coverInputId}', '${coverPreviewId}')" style="flex:1; background:transparent; border:none; color:var(--gold-light); font-size:10px; padding:5px 2px; cursor:pointer;" title="Đặt làm ảnh bìa chính">⭐ Bìa</button>`
+              : `<span style="flex:1; text-align:center; font-size:10px; color:var(--text-dim); padding:5px 2px;">Clip</span>`
+          }
+          <button type="button" onclick="removeEditorGalleryItem(${idx}, '${coverInputId}', '${coverPreviewId}')" style="flex:1; background:transparent; border:none; color:#f87171; font-size:10px; padding:5px 2px; cursor:pointer;">🗑 Xóa</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+window.setAsEditorCover = function (idx, coverInputId, coverPreviewId) {
+  const url = EDITOR_GALLERY[idx];
+  if (!url) return;
+  const inp = document.getElementById(coverInputId);
+  const prev = document.getElementById(coverPreviewId);
+  if (inp) inp.value = url;
+  if (prev) prev.src = url;
+  renderEditorGalleryBox(coverInputId, coverPreviewId);
+};
+
+window.removeEditorGalleryItem = function (idx, coverInputId, coverPreviewId) {
+  EDITOR_GALLERY.splice(idx, 1);
+  renderEditorGalleryBox(coverInputId, coverPreviewId);
+};
+
+function bindEditorGalleryControls(coverInputId, coverPreviewId) {
+  renderEditorGalleryBox(coverInputId, coverPreviewId);
+
+  const multiFileInput = document.getElementById("editorMultiMediaInput");
+  const statusEl = document.getElementById("editorGalleryUploadStatus");
+  const urlAddInput = document.getElementById("editorAddUrlInput");
+  const urlAddBtn = document.getElementById("editorAddUrlBtn");
+
+  if (multiFileInput) {
+    multiFileInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      statusEl.textContent = `⏳ Đang tải lên ${files.length} file (ảnh/video)...`;
+      let successCount = 0;
+      for (const f of files) {
+        try {
+          const uploadedUrl = await uploadImageFile(f);
+          if (!EDITOR_GALLERY.includes(uploadedUrl)) {
+            EDITOR_GALLERY.push(uploadedUrl);
+          }
+          const coverEl = document.getElementById(coverInputId);
+          if (coverEl && !coverEl.value.trim() && !isVideoMedia(uploadedUrl)) {
+            coverEl.value = uploadedUrl;
+            const prevEl = document.getElementById(coverPreviewId);
+            if (prevEl) prevEl.src = uploadedUrl;
+          }
+          successCount++;
+          renderEditorGalleryBox(coverInputId, coverPreviewId);
+        } catch (err) {
+          alert(`Lỗi tải file "${f.name}": ${err.message}`);
+        }
+      }
+      statusEl.textContent = `✅ Đã thêm thành công ${successCount} ảnh/video vào Album!`;
+      multiFileInput.value = "";
+    });
+  }
+
+  if (urlAddBtn && urlAddInput) {
+    urlAddBtn.addEventListener("click", () => {
+      const val = urlAddInput.value.trim();
+      if (!val) return;
+      if (!EDITOR_GALLERY.includes(val)) {
+        EDITOR_GALLERY.push(val);
+      }
+      urlAddInput.value = "";
+      renderEditorGalleryBox(coverInputId, coverPreviewId);
+    });
+  }
+}
+
 function renderAllAdminPanels() {
   document.getElementById("countHairstyles").textContent = FULL_DATA.hairstyles.length;
   document.getElementById("countServices").textContent = FULL_DATA.services.length;
@@ -176,15 +330,21 @@ function renderAllAdminPanels() {
 }
 
 // ============================================================================
-// 1. QUẢN LÝ MẪU TÓC (THÊM / SỬA / ĐỔI HÌNH / XÓA)
+// 1. QUẢN LÝ MẪU TÓC (THÊM / SỬA / ALBUM NHIỀU ẢNH & VIDEO / XÓA)
 // ============================================================================
 function renderAdminHairstyles() {
   const list = document.getElementById("adminHairstylesList");
   list.innerHTML = FULL_DATA.hairstyles
-    .map(
-      (h, idx) => `
+    .map((h, idx) => {
+      const galleryCount = Array.isArray(h.gallery) ? h.gallery.length : 1;
+      return `
       <div class="admin-card">
-        <img src="${escapeHtml(h.image)}" class="admin-card-img" alt="${escapeHtml(h.name)}" />
+        <div style="position:relative;">
+          <img src="${escapeHtml(h.image)}" class="admin-card-img" alt="${escapeHtml(h.name)}" />
+          <span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.8); color:var(--gold-light); font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px;">
+            🎬 Album: ${galleryCount} file
+          </span>
+        </div>
         <div class="admin-card-body">
           <div style="font-size:11px; color:var(--gold-primary); font-weight:700;">${escapeHtml(h.category)} ${h.badge ? `• ${escapeHtml(h.badge)}` : ""}</div>
           <h3 style="font-size:16px; margin:4px 0;">${escapeHtml(h.name)}</h3>
@@ -192,7 +352,7 @@ function renderAdminHairstyles() {
           <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:10px;">${escapeHtml(h.shortDesc)}</p>
           <div class="admin-card-actions">
             <button type="button" class="btn btn-gold btn-sm" style="flex:1;" onclick="openHairstyleEditor(${idx})">
-              ✏️ Sửa / Đổi Hình
+              ✏️ Sửa / Thêm Ảnh & Video
             </button>
             <button type="button" class="btn btn-outline btn-sm" style="color:#f87171;" onclick="deleteHairstyle(${idx})">
               🗑 Xóa
@@ -200,8 +360,8 @@ function renderAdminHairstyles() {
           </div>
         </div>
       </div>
-    `
-    )
+    `;
+    })
     .join("");
 }
 
@@ -228,6 +388,14 @@ window.openHairstyleEditor = function (index = null) {
         detailDesc: ""
       };
 
+  EDITOR_GALLERY = [];
+  if (item.image) EDITOR_GALLERY.push(item.image);
+  if (Array.isArray(item.gallery)) {
+    item.gallery.forEach((u) => {
+      if (u && !EDITOR_GALLERY.includes(u)) EDITOR_GALLERY.push(u);
+    });
+  }
+
   const staffOptions = FULL_DATA.staff
     .map(
       (s) =>
@@ -238,20 +406,41 @@ window.openHairstyleEditor = function (index = null) {
     .join("");
 
   const html = `
-    <h2 style="margin-bottom:14px;">${isEdit ? "✏️ Sửa Mẫu Tóc & Đổi Hình" : "➕ Thêm Mẫu Tóc Mới"}</h2>
+    <h2 style="margin-bottom:14px;">${isEdit ? "✏️ Sửa Mẫu Tóc & Album Ảnh / Video" : "➕ Thêm Mẫu Tóc Mới"}</h2>
     <form id="hairEditorForm">
       <div class="form-group">
-        <label class="form-label">Hình Ảnh Mẫu Tóc (Chọn ảnh từ Máy tính / Điện thoại hoặc dán link)</label>
+        <label class="form-label">Ảnh Bìa Chính Của Mẫu Tóc *</label>
         <input type="text" id="editHairImage" class="form-control" value="${escapeHtml(item.image)}" required />
         <div class="upload-box">
           <img id="editHairPreview" src="${escapeHtml(item.image)}" class="upload-preview" />
           <div style="flex:1;">
             <label class="btn btn-gold btn-sm" style="cursor:pointer; margin-bottom:4px;">
-              📤 Chọn Ảnh Từ Máy / Điện Thoại
+              📤 Đổi Ảnh Bìa Chính
               <input type="file" id="editHairFile" accept="image/*" style="display:none;" />
             </label>
-            <div style="font-size:12px; color:var(--text-muted);" id="editHairUploadStatus">Ảnh sẽ tự động tải lên web ngay khi chọn.</div>
+            <div style="font-size:12px; color:var(--text-muted);" id="editHairUploadStatus">Ảnh đại diện hiển thị ngoài trang chủ.</div>
           </div>
+        </div>
+      </div>
+
+      <!-- KHU VỰC THÊM NHIỀU ẢNH PHỤ & VIDEO NGẮN -->
+      <div class="form-group" style="background:rgba(212,175,55,0.06); border:1px solid var(--border-strong); border-radius:14px; padding:14px;">
+        <label class="form-label" style="font-size:14px;">🎬 Album Nhiều Ảnh Các Góc & Video Ngắn Thực Tế</label>
+        <div id="editorGalleryItems" style="display:flex; gap:10px; overflow-x:auto; padding:6px 0 10px;"></div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+          <label class="btn btn-gold btn-sm" style="cursor:pointer;">
+            📸🎥 Chọn Thêm Nhiều Ảnh & Video Ngắn Từ Máy/Điện Thoại
+            <input type="file" id="editorMultiMediaInput" accept="image/*,video/mp4,video/webm,video/quicktime" multiple style="display:none;" />
+          </label>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <input type="text" id="editorAddUrlInput" class="form-control" style="padding:8px 12px; font-size:13px;" placeholder="Hoặc dán link Ảnh / link Video MP4 vào đây..." />
+          <button type="button" id="editorAddUrlBtn" class="btn btn-outline btn-sm" style="white-space:nowrap;">+ Thêm Link</button>
+        </div>
+        <div id="editorGalleryUploadStatus" style="font-size:12px; color:var(--gold-light); margin-top:6px;">
+          Mẹo: Anh có thể quét chọn 5-10 ảnh các góc chụp và video ngắn cùng lúc!
         </div>
       </div>
 
@@ -308,12 +497,12 @@ window.openHairstyleEditor = function (index = null) {
       </div>
 
       <div class="form-group">
-        <label class="form-label">Mô Tả Chi Tiết (Hiện khi khách bấm vào xem chi tiết ảnh mẫu tóc) *</label>
+        <label class="form-label">Mô Tả Chi Tiết (Hiện khi khách bấm vào xem chi tiết mẫu tóc) *</label>
         <textarea id="editHairDetailDesc" rows="4" class="form-control" required>${escapeHtml(item.detailDesc || item.shortDesc)}</textarea>
       </div>
 
       <button type="submit" class="btn btn-gold" style="width:100%; padding:14px;">
-        💾 Lưu Mẫu Tóc Lên Website
+        💾 Lưu Mẫu Tóc & Album Ảnh/Video Lên Website
       </button>
     </form>
   `;
@@ -327,25 +516,34 @@ window.openHairstyleEditor = function (index = null) {
 
   imgInput.addEventListener("input", () => {
     imgPreview.src = imgInput.value;
+    renderEditorGalleryBox("editHairImage", "editHairPreview");
   });
 
   fileInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    statusEl.textContent = "⏳ Đang tải ảnh lên máy chủ...";
+    statusEl.textContent = "⏳ Đang tải ảnh bìa lên...";
     try {
       const url = await uploadImageFile(file);
       imgInput.value = url;
       imgPreview.src = url;
-      statusEl.textContent = "✅ Đã tải ảnh lên thành công!";
+      if (!EDITOR_GALLERY.includes(url)) EDITOR_GALLERY.unshift(url);
+      renderEditorGalleryBox("editHairImage", "editHairPreview");
+      statusEl.textContent = "✅ Đã tải ảnh bìa lên thành công!";
     } catch (err) {
       statusEl.textContent = "❌ Lỗi: " + err.message;
     }
   });
 
+  bindEditorGalleryControls("editHairImage", "editHairPreview");
+
   document.getElementById("hairEditorForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const newImg = imgInput.value.trim();
+    if (newImg && !EDITOR_GALLERY.includes(newImg)) {
+      EDITOR_GALLERY.unshift(newImg);
+    }
+
     const updatedItem = {
       ...item,
       name: document.getElementById("editHairName").value.trim(),
@@ -354,7 +552,7 @@ window.openHairstyleEditor = function (index = null) {
       duration: document.getElementById("editHairDuration").value.trim(),
       badge: document.getElementById("editHairBadge").value.trim(),
       image: newImg,
-      gallery: [newImg],
+      gallery: [...EDITOR_GALLERY],
       faceShapes: document
         .getElementById("editHairFaces")
         .value.split(",")
@@ -377,7 +575,7 @@ window.openHairstyleEditor = function (index = null) {
       FULL_DATA.hairstyles.unshift(updatedItem);
     }
 
-    await saveFullDataToServer("✅ Đã lưu mẫu tóc lên Website!");
+    await saveFullDataToServer("✅ Đã lưu mẫu tóc & album ảnh/video lên Website!");
     closeEditorModal();
   });
 };
@@ -390,15 +588,21 @@ window.deleteHairstyle = async function (index) {
 };
 
 // ============================================================================
-// 2. QUẢN LÝ DỊCH VỤ & BẢNG GIÁ (THÊM / SỬA / ĐỔI HÌNH / XÓA)
+// 2. QUẢN LÝ DỊCH VỤ & BẢNG GIÁ (THÊM NHIỀU ẢNH & VIDEO NGẮN CHO TỪNG DỊCH VỤ)
 // ============================================================================
 function renderAdminServices() {
   const list = document.getElementById("adminServicesList");
   list.innerHTML = FULL_DATA.services
-    .map(
-      (s, idx) => `
+    .map((s, idx) => {
+      const galleryCount = Array.isArray(s.gallery) ? s.gallery.length : 1;
+      return `
       <div class="admin-card">
-        <img src="${escapeHtml(s.image)}" class="admin-card-img" alt="${escapeHtml(s.name)}" />
+        <div style="position:relative;">
+          <img src="${escapeHtml(s.image)}" class="admin-card-img" alt="${escapeHtml(s.name)}" />
+          <span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.8); color:var(--gold-light); font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px;">
+            🎬 Album: ${galleryCount} ảnh/video
+          </span>
+        </div>
         <div class="admin-card-body">
           <div style="font-size:11px; color:var(--gold-primary); font-weight:700;">${escapeHtml(s.category)}</div>
           <h3 style="font-size:16px; margin:4px 0;">${escapeHtml(s.name)}</h3>
@@ -406,7 +610,7 @@ function renderAdminServices() {
           <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:10px;">${escapeHtml(s.shortDesc)}</p>
           <div class="admin-card-actions">
             <button type="button" class="btn btn-gold btn-sm" style="flex:1;" onclick="openServiceEditor(${idx})">
-              ✏️ Sửa Giá / Đổi Hình
+              ✏️ Sửa Giá / Thêm Ảnh & Video
             </button>
             <button type="button" class="btn btn-outline btn-sm" style="color:#f87171;" onclick="deleteService(${idx})">
               🗑 Xóa
@@ -414,8 +618,8 @@ function renderAdminServices() {
           </div>
         </div>
       </div>
-    `
-    )
+    `;
+    })
     .join("");
 }
 
@@ -433,6 +637,7 @@ window.openServiceEditor = function (index = null) {
         duration: "90 - 120 phút",
         warranty: "Bảo hành 30 ngày",
         image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
+        gallery: [],
         shortDesc: "",
         detailDesc: "",
         tiers: [
@@ -441,25 +646,54 @@ window.openServiceEditor = function (index = null) {
         ]
       };
 
+  EDITOR_GALLERY = [];
+  if (item.image) EDITOR_GALLERY.push(item.image);
+  if (Array.isArray(item.gallery)) {
+    item.gallery.forEach((u) => {
+      if (u && !EDITOR_GALLERY.includes(u)) EDITOR_GALLERY.push(u);
+    });
+  }
+
   const tiersText = (item.tiers || [])
     .map((t) => `${t.name} | ${t.price}`)
     .join("\n");
 
   const html = `
-    <h2 style="margin-bottom:14px;">${isEdit ? "✏️ Sửa Dịch Vụ & Bảng Giá" : "➕ Thêm Dịch Vụ Mới"}</h2>
+    <h2 style="margin-bottom:14px;">${isEdit ? "✏️ Sửa Dịch Vụ, Bảng Giá & Album Ảnh / Video" : "➕ Thêm Dịch Vụ Mới"}</h2>
     <form id="serviceEditorForm">
       <div class="form-group">
-        <label class="form-label">Hình Ảnh Dịch Vụ (Tải từ máy/điện thoại hoặc dán link)</label>
+        <label class="form-label">Ảnh Đại Diện Chính Của Dịch Vụ *</label>
         <input type="text" id="editSrvImage" class="form-control" value="${escapeHtml(item.image)}" required />
         <div class="upload-box">
           <img id="editSrvPreview" src="${escapeHtml(item.image)}" class="upload-preview" />
           <div style="flex:1;">
             <label class="btn btn-gold btn-sm" style="cursor:pointer; margin-bottom:4px;">
-              📤 Chọn Ảnh Từ Máy / Điện Thoại
+              📤 Đổi Ảnh Đại Diện Dịch Vụ
               <input type="file" id="editSrvFile" accept="image/*" style="display:none;" />
             </label>
-            <div style="font-size:12px; color:var(--text-muted);" id="editSrvUploadStatus">Hỗ trợ JPG, PNG, WEBP.</div>
+            <div style="font-size:12px; color:var(--text-muted);" id="editSrvUploadStatus">Ảnh đại diện hiển thị ngoài danh sách dịch vụ.</div>
           </div>
+        </div>
+      </div>
+
+      <!-- KHU VỰC THÊM NHIỀU ẢNH & VIDEO NGẮN CHO DỊCH VỤ -->
+      <div class="form-group" style="background:rgba(212,175,55,0.06); border:1px solid var(--border-strong); border-radius:14px; padding:14px;">
+        <label class="form-label" style="font-size:14px;">🎬 Album Nhiều Ảnh & Video Ngắn Thực Tế Của Dịch Vụ Này</label>
+        <div id="editorGalleryItems" style="display:flex; gap:10px; overflow-x:auto; padding:6px 0 10px;"></div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+          <label class="btn btn-gold btn-sm" style="cursor:pointer;">
+            📸🎥 Chọn Thêm Nhiều Ảnh & Video Ngắn (MP4/MOV) Từ Máy / Điện Thoại
+            <input type="file" id="editorMultiMediaInput" accept="image/*,video/mp4,video/webm,video/quicktime" multiple style="display:none;" />
+          </label>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <input type="text" id="editorAddUrlInput" class="form-control" style="padding:8px 12px; font-size:13px;" placeholder="Hoặc dán link Ảnh / link Video MP4 vào đây..." />
+          <button type="button" id="editorAddUrlBtn" class="btn btn-outline btn-sm" style="white-space:nowrap;">+ Thêm Link</button>
+        </div>
+        <div id="editorGalleryUploadStatus" style="font-size:12px; color:var(--gold-light); margin-top:6px;">
+          Khách bấm vào dịch vụ sẽ xem được toàn bộ album ảnh và phát video ngắn trực tiếp!
         </div>
       </div>
 
@@ -512,7 +746,7 @@ window.openServiceEditor = function (index = null) {
       </div>
 
       <button type="submit" class="btn btn-gold" style="width:100%; padding:14px;">
-        💾 Lưu Dịch Vụ & Giá Lên Website
+        💾 Lưu Dịch Vụ, Giá & Album Ảnh/Video Lên Website
       </button>
     </form>
   `;
@@ -524,7 +758,10 @@ window.openServiceEditor = function (index = null) {
   const fileInput = document.getElementById("editSrvFile");
   const statusEl = document.getElementById("editSrvUploadStatus");
 
-  imgInput.addEventListener("input", () => (imgPreview.src = imgInput.value));
+  imgInput.addEventListener("input", () => {
+    imgPreview.src = imgInput.value;
+    renderEditorGalleryBox("editSrvImage", "editSrvPreview");
+  });
   fileInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -533,11 +770,15 @@ window.openServiceEditor = function (index = null) {
       const url = await uploadImageFile(file);
       imgInput.value = url;
       imgPreview.src = url;
+      if (!EDITOR_GALLERY.includes(url)) EDITOR_GALLERY.unshift(url);
+      renderEditorGalleryBox("editSrvImage", "editSrvPreview");
       statusEl.textContent = "✅ Đã tải ảnh lên thành công!";
     } catch (err) {
       statusEl.textContent = "❌ " + err.message;
     }
   });
+
+  bindEditorGalleryControls("editSrvImage", "editSrvPreview");
 
   document.getElementById("serviceEditorForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -554,6 +795,11 @@ window.openServiceEditor = function (index = null) {
         };
       });
 
+    const newImg = imgInput.value.trim();
+    if (newImg && !EDITOR_GALLERY.includes(newImg)) {
+      EDITOR_GALLERY.unshift(newImg);
+    }
+
     const updatedItem = {
       ...item,
       name: document.getElementById("editSrvName").value.trim(),
@@ -562,7 +808,8 @@ window.openServiceEditor = function (index = null) {
       originalPriceDisplay: document.getElementById("editSrvOldPrice").value.trim(),
       duration: document.getElementById("editSrvDuration").value.trim(),
       warranty: document.getElementById("editSrvWarranty").value.trim(),
-      image: imgInput.value.trim(),
+      image: newImg,
+      gallery: [...EDITOR_GALLERY],
       shortDesc: document.getElementById("editSrvShortDesc").value.trim(),
       detailDesc: document.getElementById("editSrvDetailDesc").value.trim(),
       tiers: parsedTiers
@@ -574,7 +821,7 @@ window.openServiceEditor = function (index = null) {
       FULL_DATA.services.push(updatedItem);
     }
 
-    await saveFullDataToServer("✅ Đã lưu dịch vụ & bảng giá!");
+    await saveFullDataToServer("✅ Đã lưu dịch vụ & album ảnh/video!");
     closeEditorModal();
   });
 };
@@ -976,39 +1223,175 @@ window.loadAdminOrders = async function () {
 };
 
 // ============================================================================
-// 6. CÀI ĐẶT THÔNG TIN CHUNG CỦA SALON & TELEGRAM
+// 6. CÀI ĐẶT THÔNG TIN CHUNG CỦA SALON, LOGO/ICON, GIỚI THIỆU & TELEGRAM
 // ============================================================================
 function populateSettingsForm() {
   const info = FULL_DATA.salonInfo || {};
   const notif = FULL_DATA.notifications || {};
 
-  document.getElementById("setSalonName").value = info.name || "";
+  // Nhóm A: Thương hiệu & Logo/Icon
   document.getElementById("setShortName").value = info.shortName || "";
+  document.getElementById("setBrandSubtitle").value =
+    info.brandSubtitle !== undefined ? info.brandSubtitle : "Hair Salon & Color Lab";
+  document.getElementById("setLogoIconText").value = info.logoIconText || "✂";
+  document.getElementById("setPageTitle").value = info.pageTitle || info.name || "";
+  document.getElementById("setLogoImageUrl").value = info.logoImageUrl || "";
+  document.getElementById("previewLogoImg").src =
+    info.logoImageUrl ||
+    "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=300&q=80";
+  document.getElementById("setSalonName").value = info.name || "";
+
+  // Nhóm B: Địa chỉ, Hotline, Giờ mở cửa, Khung giờ
   document.getElementById("setHotline").value = info.hotline || "";
   document.getElementById("setOpenHours").value = info.openHours || "";
   document.getElementById("setAddress").value = info.address || "";
+  document.getElementById("setTimeSlots").value = (info.timeSlots || []).join(", ");
+
+  // Nhóm C: Phần giới thiệu đầu trang (Hero Banner)
+  document.getElementById("setHeroTag").value =
+    info.heroTag !== undefined
+      ? info.heroTag
+      : "✨ HỆ THỐNG ĐẶT LỊCH & CHỌN ĐÚNG STYLIST YÊU THÍCH";
+  document.getElementById("setHeroTitlePrefix").value =
+    info.heroTitlePrefix !== undefined ? info.heroTitlePrefix : "Khám Phá";
+  document.getElementById("setHeroTitleHighlight").value =
+    info.heroTitleHighlight !== undefined ? info.heroTitleHighlight : "Tất Cả Kiểu Tóc";
+  document.getElementById("setHeroTitleSuffix").value =
+    info.heroTitleSuffix !== undefined
+      ? info.heroTitleSuffix
+      : ", Bảng Màu & Đặt Lịch Đúng Stylist";
   document.getElementById("setDescription").value = info.description || "";
 
+  const hero1 =
+    info.heroImage1 ||
+    "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80";
+  const hero2 =
+    info.heroImage2 ||
+    "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80";
+  document.getElementById("setHeroImage1").value = hero1;
+  document.getElementById("previewHero1").src = hero1;
+  document.getElementById("setHeroImage2").value = hero2;
+  document.getElementById("previewHero2").src = hero2;
+
+  document.getElementById("setStat1Label").value = info.stat1Label || "Mẫu Tóc Thịnh Hành";
+  document.getElementById("setStat2Label").value = info.stat2Label || "Gói Dịch Vụ Minh Bạch";
+  document.getElementById("setStat3Label").value = info.stat3Label || "Mã Màu Nhuộm Chuẩn";
+  document.getElementById("setStat4Label").value = info.stat4Label || "Master & Senior Stylist";
+
+  // Nhóm D: Tiêu đề & Mô tả các mục
+  document.getElementById("setSecHairTitle").value =
+    info.sectionHairTitle || "Xem Tất Cả Kiểu Tóc & Mô Tả Chi Tiết";
+  document.getElementById("setSecHairSub").value =
+    info.sectionHairSub ||
+    "Bấm vào từng ảnh mẫu tóc để xem chi tiết kỹ thuật cắt/uốn/nhuộm, khuôn mặt phù hợp, thời gian làm và chọn nhân viên thực hiện.";
+  document.getElementById("setSecServiceTitle").value =
+    info.sectionServiceTitle || "Tất Cả Dịch Vụ Làm Tóc & Chi Tiết Giá";
+  document.getElementById("setSecServiceSub").value =
+    info.sectionServiceSub ||
+    "Cam kết báo đúng giá theo gói dịch vụ, sử dụng thuốc chính hãng và bảo hành miễn phí rõ ràng cho từng dịch vụ.";
+  document.getElementById("setSecColorTitle").value =
+    info.sectionColorTitle || "Bảng Màu Sắc Tóc & Tư Vấn Tông Da";
+  document.getElementById("setSecColorSub").value =
+    info.sectionColorSub ||
+    "Khám phá các mã màu nhuộm từ Nâu Công Sở không cần tẩy đến Balayage / Khói thời thượng. Bấm vào màu bất kỳ để xem chi tiết & chọn nhuộm.";
+  document.getElementById("setSecStaffTitle").value =
+    info.sectionStaffTitle || "Chọn Nhân Viên Tư Vấn & Đặt Lịch Đúng Stylist";
+  document.getElementById("setSecStaffSub").value =
+    info.sectionStaffSub ||
+    "Mỗi Stylist có thế mạnh riêng và thông tin số điện thoại / Zalo trực tiếp. Quý khách có thể Order nhân viên tư vấn hoặc Đặt lịch đích danh nhân viên mình yêu thích.";
+  document.getElementById("setSecBookingTitle").value =
+    info.sectionBookingTitle || "Gửi Yêu Cầu Về Salon & Nhận SĐT Nhân Viên Ngay";
+  document.getElementById("setSecBookingSub").value =
+    info.sectionBookingSub ||
+    "Sau khi bấm gửi, đơn của quý khách sẽ được chuyển ngay về máy chủ Salon & thông báo cho đúng nhân viên phụ trách, đồng thời hiển thị SĐT/Zalo của nhân viên đó để quý khách liên lạc trực tiếp.";
+  document.getElementById("setFooterNote").value =
+    info.footerNote !== undefined
+      ? info.footerNote
+      : "Hệ thống Đặt lịch làm tóc & Tư vấn Stylist trực tuyến 24/7.";
+
+  // Nhóm E: Thông báo & Mật khẩu
   document.getElementById("setTgToken").value = notif.telegramBotToken || "";
   document.getElementById("setTgChatId").value = notif.telegramChatId || "";
   document.getElementById("setZaloWebhook").value = notif.zaloWebhookUrl || "";
   document.getElementById("setAdminPasscode").value = notif.adminPasscode || ADMIN_PASS;
 }
 
+function bindUploadField(fileInputId, urlInputId, previewImgId, statusId) {
+  const fileEl = document.getElementById(fileInputId);
+  const urlEl = document.getElementById(urlInputId);
+  const previewEl = document.getElementById(previewImgId);
+  const statusEl = document.getElementById(statusId);
+
+  if (!fileEl || !urlEl) return;
+
+  urlEl.addEventListener("input", () => {
+    if (previewEl) previewEl.src = urlEl.value;
+  });
+
+  fileEl.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (statusEl) statusEl.textContent = "⏳ Đang tải ảnh lên...";
+    try {
+      const uploadedUrl = await uploadImageFile(file);
+      urlEl.value = uploadedUrl;
+      if (previewEl) previewEl.src = uploadedUrl;
+      if (statusEl) statusEl.textContent = "✅ Đã tải ảnh lên thành công! Nhớ bấm Lưu ở dưới cùng.";
+    } catch (err) {
+      if (statusEl) statusEl.textContent = "❌ Lỗi: " + err.message;
+    }
+  });
+}
+
 function initSettingsForm() {
+  bindUploadField("fileLogoUpload", "setLogoImageUrl", "previewLogoImg", "statusLogoUpload");
+  bindUploadField("fileHero1", "setHeroImage1", "previewHero1", "statusHero1");
+  bindUploadField("fileHero2", "setHeroImage2", "previewHero2", "statusHero2");
+
   document.getElementById("salonSettingsForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const newPass = document.getElementById("setAdminPasscode").value.trim() || "123456";
+    const parsedSlots = document
+      .getElementById("setTimeSlots")
+      .value.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     FULL_DATA.salonInfo = {
       ...FULL_DATA.salonInfo,
-      name: document.getElementById("setSalonName").value.trim(),
       shortName: document.getElementById("setShortName").value.trim(),
+      brandSubtitle: document.getElementById("setBrandSubtitle").value.trim(),
+      logoIconText: document.getElementById("setLogoIconText").value.trim() || "✂",
+      pageTitle: document.getElementById("setPageTitle").value.trim(),
+      logoImageUrl: document.getElementById("setLogoImageUrl").value.trim(),
+      name: document.getElementById("setSalonName").value.trim(),
       hotline: document.getElementById("setHotline").value.trim(),
       zaloMain: document.getElementById("setHotline").value.trim(),
       openHours: document.getElementById("setOpenHours").value.trim(),
       address: document.getElementById("setAddress").value.trim(),
-      description: document.getElementById("setDescription").value.trim()
+      timeSlots: parsedSlots.length ? parsedSlots : FULL_DATA.salonInfo.timeSlots,
+      heroTag: document.getElementById("setHeroTag").value.trim(),
+      heroTitlePrefix: document.getElementById("setHeroTitlePrefix").value.trim(),
+      heroTitleHighlight: document.getElementById("setHeroTitleHighlight").value.trim(),
+      heroTitleSuffix: document.getElementById("setHeroTitleSuffix").value.trim(),
+      description: document.getElementById("setDescription").value.trim(),
+      heroImage1: document.getElementById("setHeroImage1").value.trim(),
+      heroImage2: document.getElementById("setHeroImage2").value.trim(),
+      stat1Label: document.getElementById("setStat1Label").value.trim(),
+      stat2Label: document.getElementById("setStat2Label").value.trim(),
+      stat3Label: document.getElementById("setStat3Label").value.trim(),
+      stat4Label: document.getElementById("setStat4Label").value.trim(),
+      sectionHairTitle: document.getElementById("setSecHairTitle").value.trim(),
+      sectionHairSub: document.getElementById("setSecHairSub").value.trim(),
+      sectionServiceTitle: document.getElementById("setSecServiceTitle").value.trim(),
+      sectionServiceSub: document.getElementById("setSecServiceSub").value.trim(),
+      sectionColorTitle: document.getElementById("setSecColorTitle").value.trim(),
+      sectionColorSub: document.getElementById("setSecColorSub").value.trim(),
+      sectionStaffTitle: document.getElementById("setSecStaffTitle").value.trim(),
+      sectionStaffSub: document.getElementById("setSecStaffSub").value.trim(),
+      sectionBookingTitle: document.getElementById("setSecBookingTitle").value.trim(),
+      sectionBookingSub: document.getElementById("setSecBookingSub").value.trim(),
+      footerNote: document.getElementById("setFooterNote").value.trim()
     };
 
     FULL_DATA.notifications = {
@@ -1019,7 +1402,9 @@ function initSettingsForm() {
       adminPasscode: newPass
     };
 
-    const ok = await saveFullDataToServer("✅ Đã lưu thông tin Salon & cài đặt thông báo!");
+    const ok = await saveFullDataToServer(
+      "✅ Đã lưu toàn bộ Thương hiệu, Logo, Giới thiệu, Địa chỉ & Hotline lên Website!"
+    );
     if (ok) {
       ADMIN_PASS = newPass;
       localStorage.setItem("SALON_ADMIN_PASS", newPass);
